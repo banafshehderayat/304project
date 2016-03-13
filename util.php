@@ -1,7 +1,7 @@
 <html>
 <?php
 
-class util {
+class Util {
 function executeBoundSQL($cmdstr, $list) {
 	/* Sometimes a same statement will be excuted for severl times, only
 	 the value of variables need to be changed.
