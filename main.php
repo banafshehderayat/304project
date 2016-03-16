@@ -13,8 +13,8 @@ ini_set('display_errors',1);
 
 require 'util.php';
 $util = new Util;
-
 $debug = True;
+
 $db_conn = OCILogon("ora_b9y8", "a38319125", "ug");
 if ($db_conn) {
 	
@@ -33,7 +33,10 @@ if ($db_conn) {
 
 		$util->executeBoundSQL("insert into customers values (:bind1, :bind2)", $allTuple);
 		OCICommit($db_conn);
-		echo "Customer added\n";
+
+		if ($debug) { 
+			echo "Customer added\n";
+		}
 	}
 
 	if ($debug) {
