@@ -15,6 +15,19 @@ CREATE TABLE payment
 	primary key (transaction_id));
  
 grant select on payment to public;
+
+CREATE TABLE cash_payment 
+	(transaction_id int not null,
+	 primary key (transaction_id),
+	 foreign key (transaction_id) references payment);
+grant select on cash_payment to public;
+
+CREATE TABLE card_payment 
+	(transaction_id int not null,
+	 card_number char(16),
+	 primary key (transaction_id),
+	 foreign key (transaction_id) references payment);
+grant select on card_payment to public;
  
 CREATE TABLE location
 	(location_address varchar(40) not null,
@@ -32,6 +45,17 @@ CREATE TABLE rooms
 
 grant select on rooms to public;
 
+CREATE TABLE employee
+	(employee_id int not null,
+	 name varchar(40),
+	 location_address varchar(40),
+	 primary key (employee_id),
+	 foreign key (location_address) references location);
+
+grant select on employee to public;
+
+
+
 
 insert into customers
 values('Bennet Abraham', '6223 Bateman St. Berkeley, CA 94705');
@@ -40,11 +64,17 @@ insert into customers
 values ('Majorie Green', '309 63rd St. #411, Oakland, CA 94618');
  
  
-insert into payment
+insert into cash_payment
 values('0736');
  
-insert into payment
+insert into cash_payment
 values('0877');
+
+insert into card_payment
+values('4455', '1111222233334444');
+
+insert into card_payment
+values('6655', '5555666677778888');
 
 insert into location
 values ('123 Main Street');
@@ -57,3 +87,9 @@ values ('1', '123 Main Street', 'Penthouse Suite', '8');
 
 insert into rooms
 values ('2', '111 UBC', 'King Room', '4');
+
+insert into employee
+values ('1' , 'James Bond' , '123 Main Street');
+
+insert into employee
+values ('2' , 'Austin Powers' , '111 UBC');
