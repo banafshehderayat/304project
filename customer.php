@@ -1,6 +1,6 @@
 
 <html>
-<form method="POST" action="main.php">
+<form method="POST" action="customer.php">
 	Customer Name: <input type="text" name="custName"> <br>
 	Customer Address: <input type="text" name="custAddr"> <br>
 	<input type="submit" value="Add Customer" name="addCust"></p>

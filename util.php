@@ -63,7 +63,7 @@ function executePlainSQL($cmdstr) { //takes a plain (no bound variables) SQL com
 	return $statement;
 }
 
-function printResult($result) { //prints results from a select statement
+function printResultTable($result) { //prints results from a select statement
 	echo "<br>Got data from table customers:<br>";
 	echo "<table>";
 	echo "<tr><th>cname</th><th>address</th></tr>";
@@ -73,6 +73,18 @@ function printResult($result) { //prints results from a select statement
 		echo "<tr><td>" . $row["CNAME"] . "</td><td>" . $row["ADDRESS"] . "</td></tr>"; //or just use "echo $row[0]" 
 	}
 	echo "</table>";
+
+}
+
+function printResultDropdown($result) { //prints results from a select statement
+
+	echo "<option value=\"location1\">" . "f" . "</option>";
+	while ($row = OCI_Fetch_Array($result, OCI_BOTH)) {
+
+		echo "<option value=\"location2\">" . "dee" . "</option>";
+		// Row indices MUST BE IN CAPS
+		echo "<option value=\"location1\">" . $row['LOCATION_ADDRESS'] . "</option>";
+	}
 
 }
 }
