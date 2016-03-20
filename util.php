@@ -21,8 +21,6 @@ function executeBoundSQL($cmdstr, $list) {
 
 	foreach ($list as $tuple) {
 		foreach ($tuple as $bind => $val) {
-			//echo $val;
-			//echo "<br>".$bind."<br>";
 			OCIBindByName($statement, $bind, $val);
 			unset ($val); //make sure you do not remove this. Otherwise $val will remain in an array object wrapper which will not be recognized by Oracle as a proper datatype
 
@@ -42,7 +40,7 @@ function executePlainSQL($cmdstr) { //takes a plain (no bound variables) SQL com
 	//echo "<br>running ".$cmdstr."<br>";
 	global $db_conn, $success;
 	$statement = OCIParse($db_conn, $cmdstr); //There is a set of comments at the end of the file that describe some of the OCI specific functions and how they work
-
+	
 	if (!$statement) {
 		echo "<br>Cannot parse the following command: " . $cmdstr . "<br>";
 		$e = OCI_Error($db_conn); // For OCIParse errors pass the       
@@ -58,23 +56,37 @@ function executePlainSQL($cmdstr) { //takes a plain (no bound variables) SQL com
 		echo htmlentities($e['message']);
 		$success = False;
 	} else {
-
 	}
 	return $statement;
 }
 
-function printResult($result) { //prints results from a select statement
-	echo "<br>Got data from table customers:<br>";
+function printResultTable($result, $cols) { //prints results from a select statement
 	echo "<table>";
-	echo "<tr><th>cname</th><th>address</th></tr>";
+	echo "<tr>";
+
+	foreach ($cols as &$col) {
+		echo "<th>$col</th>";
+	}
+	echo "</tr>";
 
 	while ($row = OCI_Fetch_Array($result, OCI_BOTH)) {
 		// Row indices MUST BE IN CAPS
-		echo "<tr><td>" . $row["CNAME"] . "</td><td>" . $row["ADDRESS"] . "</td></tr>"; //or just use "echo $row[0]" 
+		// echo "<tr><td>" . $row["CNAME"] . "</td><td>" . $row["ADDRESS"] . "</td></tr>"; //or just use "echo $row[0]" 
+		echo "<tr>";
+		foreach ($cols as &$col) {
+			echo "<td>" . $row[$col] . "</td>";
+		}
+		echo "</tr>";
 	}
 	echo "</table>";
 
 }
+
+function printResultDropdown($result, $col) { //prints results from a select statement
+	while ($row = OCI_Fetch_Array($result, OCI_BOTH)) {
+			echo "<option>" . $row[$col] . "</option>";
+		}
+	}
 }
 ?>
 </html>
