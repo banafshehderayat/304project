@@ -1,5 +1,9 @@
-drop table customers;
+drop table cash_payment;
+drop table card_payment;
 drop table payment;
+drop table employee;
+drop table reserves;
+drop table customers;
 drop table rooms;
 drop table location;
 
@@ -54,6 +58,17 @@ CREATE TABLE employee
 
 grant select on employee to public;
 
+CREATE TABLE reserves
+	(name varchar(40) not null,
+	 address varchar(40) not null,
+	 location_address varchar(40) not null,
+	 room_number int not null,
+	 primary key (name, address, location_address, room_number),
+	 foreign key (name, address) references customers,
+	 foreign key (location_address) references location,
+	 foreign key (room_number, location_address) references rooms);
+
+grant select on reserves to public;
 
 
 

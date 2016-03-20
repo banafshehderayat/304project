@@ -27,7 +27,7 @@
 	</select>
 
 	<br>
-	Room: <input type="text" name="custName"> <br>
+	Room: <input type="text" name="room"> <br>
 	<input type="submit" value="Add Customer" name="addCust"></p>
 </form>
 
@@ -50,13 +50,16 @@ if ($db_conn) {
 	if (array_key_exists('addCust', $_POST)) {
 		$tuple = array (
 				":bind1" => $_POST['custName'],
-				":bind2" => $_POST['custAddr']
+				":bind2" => $_POST['custAddr'],
+				":bind3" => $_POST['loc'],
+				":bind4" => $_POST['room']
 			);
 		$allTuple = array (
 			$tuple
 		);
 
 		$util->executeBoundSQL("insert into customers values (:bind1, :bind2)", $allTuple);
+		$util->executeBoundSQL("insert into reserves values (:bind1, :bind2, :bind3, :bind4)", $allTuple);
 		OCICommit($db_conn);
 
 		if ($debug) { 
@@ -65,7 +68,7 @@ if ($db_conn) {
 	}
 
 	if ($debug) {
-		$result = $util->executePlainSQL("select * from customers");
+		$result = $util->executePlainSQL("select * from reserves");
 		$util->printResultTable($result);
 	}
 
