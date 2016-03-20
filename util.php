@@ -42,7 +42,7 @@ function executePlainSQL($cmdstr) { //takes a plain (no bound variables) SQL com
 	//echo "<br>running ".$cmdstr."<br>";
 	global $db_conn, $success;
 	$statement = OCIParse($db_conn, $cmdstr); //There is a set of comments at the end of the file that describe some of the OCI specific functions and how they work
-
+	
 	if (!$statement) {
 		echo "<br>Cannot parse the following command: " . $cmdstr . "<br>";
 		$e = OCI_Error($db_conn); // For OCIParse errors pass the       
@@ -69,6 +69,7 @@ function printResultTable($result) { //prints results from a select statement
 	echo "<tr><th>cname</th><th>address</th></tr>";
 
 	while ($row = OCI_Fetch_Array($result, OCI_BOTH)) {
+
 		// Row indices MUST BE IN CAPS
 		echo "<tr><td>" . $row["CNAME"] . "</td><td>" . $row["ADDRESS"] . "</td></tr>"; //or just use "echo $row[0]" 
 	}
@@ -77,8 +78,12 @@ function printResultTable($result) { //prints results from a select statement
 }
 
 function printResultDropdown($result) { //prints results from a select statement
-
+	echo "hi";
 	while ($row = OCI_Fetch_Array($result, OCI_BOTH)) {
+		echo "hi";
+		echo $row;
+		echo $row['LOCATION_ADDRESS'];
+		echo "hi";
 		// Row indices MUST BE IN CAPS
 		echo "<option value=\"location1\">" . $row['LOCATION_ADDRESS'] . "</option>";
 	}

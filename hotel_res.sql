@@ -32,12 +32,11 @@ CREATE TABLE card_payment
 	 primary key (transaction_id),
 	 foreign key (transaction_id) references payment);
 grant select on card_payment to public;
- 
+
 CREATE TABLE location
 	(location_address varchar(40) not null,
 	 primary key (location_address));
-
-grant select on location to public;
+	grant select on location to public;
 
 CREATE TABLE rooms
 	(room_number int not null,
@@ -46,8 +45,7 @@ CREATE TABLE rooms
 	 max_occupancy int,
 	 primary key (room_number, location_address),
 	 foreign key (location_address) references location);
-
-grant select on rooms to public;
+ 	grant select on rooms to public;
 
 CREATE TABLE employee
 	(employee_id int not null,
@@ -69,8 +67,6 @@ CREATE TABLE reserves
 	 foreign key (room_number, location_address) references rooms);
 
 grant select on reserves to public;
-
-
 
 insert into customers
 values('Bennet Abraham', '6223 Bateman St. Berkeley, CA 94705');
@@ -119,3 +115,6 @@ values ('1' , 'James Bond' , '123 Main Street');
 
 insert into employee
 values ('2' , 'Austin Powers' , '111 UBC');
+
+insert into reserves
+values ('Bennet Abraham', '6223 Bateman St. Berkeley, CA 94705', '123 Main Street', '1');
