@@ -63,6 +63,17 @@ values('Bennet Abraham', '6223 Bateman St. Berkeley, CA 94705');
 insert into customers
 values ('Majorie Green', '309 63rd St. #411, Oakland, CA 94618');
  
+insert into payment
+values('0736');
+ 
+insert into payment
+values('0877');
+
+insert into payment
+values('4455');
+
+insert into payment
+values('6655');
  
 insert into cash_payment
 values('0736');
