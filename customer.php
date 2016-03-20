@@ -41,7 +41,7 @@ if ($db_conn) {
 
 	if ($debug) {
 		$result = $util->executePlainSQL("select * from customers");
-		$util->printResult($result);
+		$util->printResultTable($result);
 	}
 
 	OCILogoff($db_conn);

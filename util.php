@@ -78,10 +78,7 @@ function printResultTable($result) { //prints results from a select statement
 
 function printResultDropdown($result) { //prints results from a select statement
 
-	echo "<option value=\"location1\">" . "f" . "</option>";
 	while ($row = OCI_Fetch_Array($result, OCI_BOTH)) {
-
-		echo "<option value=\"location2\">" . "dee" . "</option>";
 		// Row indices MUST BE IN CAPS
 		echo "<option value=\"location1\">" . $row['LOCATION_ADDRESS'] . "</option>";
 	}
