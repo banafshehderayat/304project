@@ -3,7 +3,7 @@
 <form method="POST" action="employee.php">
 	Customer Name: <input type="text" name="custName"> <br>
 	Customer Address: <input type="text" name="custAddr"> <br>
-	<input type="submit" value="Add Customer" name="findCust"></p>
+	<input type="submit" value="Find Customer" name="findCust"></p>
 </form>
 
 
@@ -13,7 +13,7 @@ ini_set('display_errors',1);
 
 require 'util.php';
 $util = new Util;
-$debug = True;
+$debug = False;
 
 $db_conn = OCILogon("ora_b9y8", "a38319125", "ug");
 if ($db_conn) {
@@ -22,7 +22,7 @@ if ($db_conn) {
 		echo "Successfully connected to Oracle. \n";
 	}
 
-	if (array_key_exists('addCust', $_POST)) {
+	if (array_key_exists('findCust', $_POST)) {
 		$tuple = array (
 				":bind1" => $_POST['custName'],
 				":bind2" => $_POST['custAddr']
@@ -30,9 +30,14 @@ if ($db_conn) {
 		$allTuple = array (
 			$tuple
 		);
-
-		$util->executeBoundSQL("insert into customers values (:bind1, :bind2)", $allTuple);
+		
+		$customers = $util->executeBoundSQL("select * FROM customers
+					WHERE CNAME = (:bind1) AND 
+					ADDRESS = (:bind2)", $allTuple);
+		
 		OCICommit($db_conn);
+		$util->printResult($customers);
+
 
 		if ($debug) { 
 			echo "Customer added\n";

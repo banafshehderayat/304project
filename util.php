@@ -67,7 +67,7 @@ function printResult($result) { //prints results from a select statement
 	echo "<br>Got data from table customers:<br>";
 	echo "<table>";
 	echo "<tr><th>cname</th><th>address</th></tr>";
-
+	echo ($result);
 	while ($row = OCI_Fetch_Array($result, OCI_BOTH)) {
 		// Row indices MUST BE IN CAPS
 		echo "<tr><td>" . $row["CNAME"] . "</td><td>" . $row["ADDRESS"] . "</td></tr>"; //or just use "echo $row[0]" 
