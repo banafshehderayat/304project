@@ -17,7 +17,6 @@
 
   			$db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
 			if ($db_conn) {
-
 				$result = $util2->executePlainSQL("select * from location");
 				$util2->printResultDropdown($result);
 				OCILogoff($db_conn);
@@ -67,7 +66,7 @@ if ($db_conn) {
 	}
 
 	if ($debug) {
-		$result = $util->executePlainSQL("select * from reserves");
+		$result = $util->executePlainSQL("select * from customers");
 		$util->printResultTable($result);
 	}
 

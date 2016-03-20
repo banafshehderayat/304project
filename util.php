@@ -50,7 +50,7 @@ function executePlainSQL($cmdstr) { //takes a plain (no bound variables) SQL com
 		echo htmlentities($e['message']);
 		$success = False;
 	}
-
+	echo $statement;
 	$r = OCIExecute($statement, OCI_DEFAULT);
 	if (!$r) {
 		echo "<br>Cannot execute the following command: " . $cmdstr . "<br>";
@@ -58,7 +58,7 @@ function executePlainSQL($cmdstr) { //takes a plain (no bound variables) SQL com
 		echo htmlentities($e['message']);
 		$success = False;
 	} else {
-
+		echo $statement;
 	}
 	return $statement;
 }
@@ -78,12 +78,12 @@ function printResultTable($result) { //prints results from a select statement
 }
 
 function printResultDropdown($result) { //prints results from a select statement
-	echo "hi";
+	// echo "hi";
 	while ($row = OCI_Fetch_Array($result, OCI_BOTH)) {
-		echo "hi";
-		echo $row;
-		echo $row['LOCATION_ADDRESS'];
-		echo "hi";
+		// echo "hi";
+		// echo $row;
+		// echo $row['LOCATION_ADDRESS'];
+		// echo "hi";
 		// Row indices MUST BE IN CAPS
 		echo "<option value=\"location1\">" . $row['LOCATION_ADDRESS'] . "</option>";
 	}

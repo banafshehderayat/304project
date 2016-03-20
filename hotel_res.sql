@@ -5,7 +5,7 @@ drop table employee;
 drop table reserves;
 drop table customers;
 drop table rooms;
-drop table location;
+-- drop table location;
 
 create table customers
 	(cname varchar(40) not null,
