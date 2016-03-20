@@ -1,5 +1,8 @@
 drop table customers;
+drop table card_payment;
+drop table cash_payment;
 drop table payment;
+drop table employee;
 drop table rooms;
 drop table location;
 
@@ -19,14 +22,14 @@ grant select on payment to public;
 CREATE TABLE cash_payment 
 	(transaction_id int not null,
 	 primary key (transaction_id),
-	 foreign key (transaction_id) references payment);
+	 foreign key (transaction_id) references payment(transaction_id));
 grant select on cash_payment to public;
 
 CREATE TABLE card_payment 
 	(transaction_id int not null,
 	 card_number char(16),
 	 primary key (transaction_id),
-	 foreign key (transaction_id) references payment);
+	 foreign key (transaction_id) references payment(transaction_id));
 grant select on card_payment to public;
  
 CREATE TABLE location
@@ -62,8 +65,16 @@ values('Bennet Abraham', '6223 Bateman St. Berkeley, CA 94705');
  
 insert into customers
 values ('Majorie Green', '309 63rd St. #411, Oakland, CA 94618');
- 
- 
+ insert into payment
+values('0736');
+insert into payment
+values('0877');
+insert into payment
+values('4455');
+
+insert into payment
+values('6655');
+
 insert into cash_payment
 values('0736');
  
