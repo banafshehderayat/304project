@@ -179,26 +179,19 @@ class Login
     }
 
     /**
-     * Checks if user exits, if so: check if provided password matches the one in the database
+     * Checks if provided information mathces a customer. If it does, do not check whether
+     * it matches an employee.
+     *
+     * If info doesn't match a customer, check if info matches an employee. 
      * @return bool User login success status
      */
     private function checkPasswordCorrectnessAndLogin()
     {
         if ($this->checkCustomerLogin()) {
-            if ($this->user_is_logged_in) {
-                // TODO: commented out for now, but perhaps this is an option for redirecting onto
-                //       appropriate customer/employee/manager page
-                // echo "<meta http-equiv=\"refresh\" content=\"0; URL='http://www.google.com'\" />";
-                return true;
-            }
+            if ($this->user_is_logged_in) return true;
         }
         elseif ($this->checkEmployeeLogin()) {
-            if ($this->user_is_logged_in) {
-                // TODO: commented out for now, but perhaps this is an option for redirecting onto
-                //       appropriate customer/employee/manager page
-                // echo "<meta http-equiv=\"refresh\" content=\"0; URL='http://www.google.com'\" />";
-                return true;
-            }
+            if ($this->user_is_logged_in) return true;
         }
         
         return false;
@@ -270,11 +263,16 @@ class Login
         }
         OCICommit($this->db_connection);
 
-        $row = oci_fetch_array($statement);
+        $row = oci_fetch_array($statement, OCI_ASSOC+OCI_RETURN_NULLS);
         if ($row) {
             // Now, check if the password matches
             if (password_verify($_POST['password'], $row['PASSWORD'])) {
-                $_SESSION['user_type'] = 'EMPLOYEE';
+                if (empty($row['MANAGER_ID'])) {
+                    $_SESSION['user_type'] = 'MANAGER';    
+                }
+                else {
+                    $_SESSION['user_type'] = 'EMPLOYEE';
+                }
                 $_SESSION['id'] = $row['EMPLOYEE_ID'];
                 $_SESSION['user_is_logged_in'] = true;
                 $this->user_is_logged_in = true;
@@ -393,8 +391,27 @@ class Login
             echo $this->feedback . "<br/><br/>";
         }
 
-        echo 'Hello ' . $_SESSION['user_type'] . ', you are logged in.<br/><br/>';
+        echo 'Hello ' . $_SESSION['user_type'] . ', you have been logged in.<br/>';
+        echo 'Please wait while we redirect you. <br/><br/>';
+
+        $this->redirectAfterLogin();
+
         echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=logout">Log out</a>';
+    }
+
+    /**
+     * Redirect to the correct php page after logging in
+     */
+    private function redirectAfterLogin() {
+        if ($_SESSION['user_type'] == 'CUSTOMER') {
+            echo "<meta http-equiv=\"refresh\" content=\"1; URL='customer.php'\" />";    
+        }
+        elseif ($_SESSION['user_type'] == 'MANAGER') {
+            echo "<meta http-equiv=\"refresh\" content=\"1; URL='manager.php'\" />";    
+        }
+        else {
+            echo "<meta http-equiv=\"refresh\" content=\"1; URL='employee.php'\" />";
+        }
     }
 
     /**
