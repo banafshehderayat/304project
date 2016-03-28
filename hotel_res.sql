@@ -14,6 +14,7 @@ create table customers
 	(cname varchar(40) not null,
 	 address varchar(40) not null,
 	 cid number not null unique,
+	 password varchar(255) not null,
 	 primary key (cname, address));
 
 	CREATE SEQUENCE cu_seq;
@@ -102,9 +103,10 @@ CREATE TABLE rooms
 
 CREATE TABLE employee
 	(employee_id number not null,
-	 name varchar(40),
-	 location_address varchar(40),
+	 name varchar(40) not null,
+	 location_address varchar(40) not null,
 	 manager_id int,
+	 password varchar(255) not null,
 	 primary key (employee_id),
 	 foreign key (location_address) references location,
 	 foreign key (manager_id) references employee);
@@ -150,14 +152,20 @@ CREATE TABLE reserves
 
 grant select on reserves to public;
 
+
+
+--> Password is hashed versions of the string 'ccc' <---
 insert into customers
-values('Bennet Abraham', '6223 Bateman St. Berkeley, CA 94705', 54);
+values('Bennet Abraham', '6223 Bateman St. Berkeley, CA 94705', null, 
+	'$2y$10$GU5jDoFrdUDG90aKuMfNRel4JadmBhmxISoWtj60LABsoBpr2j8sW');
  
 insert into customers
-values ('Majorie Green', '309 63rd St. #411, Oakland, CA 94618', 21);
+values ('Majorie Green', '309 63rd St. #411, Oakland, CA 94618', null, 
+	'$2y$10$GU5jDoFrdUDG90aKuMfNRel4JadmBhmxISoWtj60LABsoBpr2j8sW');
 
 insert into customers
-values ('Elliot', '010 Robot St', null);
+values ('Elliot', '010 Robot St', null,
+	'$2y$10$GU5jDoFrdUDG90aKuMfNRel4JadmBhmxISoWtj60LABsoBpr2j8sW');
 
 insert into payment
 values(0736, 40);
@@ -228,17 +236,22 @@ values (3, '111 UBC', 'Single', 1);
 insert into rooms
 values (4, '111 UBC', 'Single', 1);
 
+--> Password is hashed versions of the string 'eee' <---
 insert into employee
-values (null , 'Sarah Parallel', '123 Main Street', null);
+values (null , 'Sarah Parallel', '123 Main Street', null,
+	'$2y$10$C4/RI35R3Th/E/dTMW6OgeY9sEaCN.qNJZAW151XEPZABk6f68npu');
 
 insert into employee
-values (null , 'Austin Powers' , '111 UBC', 1);
+values (null , 'James Bond' , '123 Main Street', null, 
+	'$2y$10$C4/RI35R3Th/E/dTMW6OgeY9sEaCN.qNJZAW151XEPZABk6f68npu');
 
 insert into employee
-values (null , 'Emily Terran' , '111 UBC', 1);
+values (null , 'Austin Powers' , '111 UBC', 1, 
+	'$2y$10$C4/RI35R3Th/E/dTMW6OgeY9sEaCN.qNJZAW151XEPZABk6f68npu');
 
 insert into employee
-values (null , 'James Bond', '123 Main Street', 1);
+values (null , 'Emily Terran' , '111 UBC', 2,
+	'$2y$10$C4/RI35R3Th/E/dTMW6OgeY9sEaCN.qNJZAW151XEPZABk6f68npu');
 
 insert into reserves
 values ('Bennet Abraham', '6223 Bateman St. Berkeley, CA 94705', '123 Main Street', 1, 0736, '13-NOV-16', '15-NOV-16');
