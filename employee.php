@@ -6,14 +6,11 @@
         <br>
         <br>
 	Location:
-	<select name="location">
+	<select name="loc">
   		<?php 
   			require_once 'util.php';
   			$util2 = new Util;
-			$debug = True;
-			if ($debug) {
-			}
-  			$db_conn = OCILogon("ora_k2c9", "a34676130", "ug");
+  			$db_conn = OCILogon("ora_b9y8", "a38319125", "ug");
 			if ($db_conn) {
 				$result = $util2->executePlainSQL("select * from location");
 				$util2->printResultDropdown($result);
@@ -26,8 +23,10 @@
 
         Start Date : <input type="date" name="startDate"><br>
         End Date : <input type="date" name="endDate"><br>
-        <input type="submit" value="Find Available Rooms"
-name="findRooms"></p>
+        <input type="submit" value="Find Available Rooms" name="findRooms"></p>
+	
+	<input type="submit" value="Update Rooms" name="updateRooms"></p>
+	
 
 </form>
 
@@ -40,7 +39,7 @@ require_once 'util.php';
 $util = new Util;
 $debug = True;
 
-$db_conn = OCILogon("ora_k2c9", "a34676130", "ug");
+$db_conn = OCILogon("ora_b9y8", "a38319125", "ug");
 if ($db_conn) {
         if ($debug) {
                 echo "Successfully connected to Oracle. \n";
@@ -62,27 +61,28 @@ if ($db_conn) {
         } else
 		if (array_key_exists('viewRooms', $_POST)) {
 			
-		$statement = 'SELECT * FROM rooms WHERE location_address = :bind';
-                $stid = oci_parse($db_conn, $statement);
-                $bind = $_POST['location'];
-                OCIBindByName($stid, ':bind', $bind);
-                OCIExecute($stid);
-		echo($stid);
-                $util->printResultRooms($stid);
-                OCICommit($db_conn);
-                if ($debug) {
-                        $result = $util->executePlainSQL("select * from rooms");
-			$util->printResultRooms($result);
-                }
-	if ($debug) {
-		
-	}
-		}
+			$statement = "SELECT * FROM rooms where location_address = :bind";
+                	$stid = oci_parse($db_conn, $statement);
+                	$bind = $_POST['loc'];
+                	OCIBindByName($stid, ':bind', $bind);
+                	OCIExecute($stid);
+			echo($stid);
+                	$util->printResultRooms($stid);
+                	OCICommit($db_conn);
+                	if ($debug) {
+                        	$result = $util->executePlainSQL("select * from rooms");
+				$util->printResultRooms($result);
+                	}
+	
+		} else 
+			if (array_key_exists('updateRooms', $_POST)){
+				header('Location: http://www.ugrad.cs.ubc.ca/~k2c9/updateRooms.php');			
+			}
+
 
 
         OCILogoff($db_conn);
-}
-else {
+}else {
         $err = OCIError();
         echo "Oracle Connect Error" . $err['message'];
 }

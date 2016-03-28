@@ -1,8 +1,9 @@
-drop table customers;
-drop table card_payment;
 drop table cash_payment;
+drop table card_payment;
 drop table payment;
 drop table employee;
+drop table reserves;
+drop table customers;
 drop table rooms;
 drop table location;
 
@@ -24,21 +25,20 @@ grant select on payment to public;
 CREATE TABLE cash_payment 
 	(transaction_id number not null,
 	 primary key (transaction_id),
-	 foreign key (transaction_id) references payment);
+	 foreign key (transaction_id) references payment(transaction_id));
 grant select on cash_payment to public;
 
 CREATE TABLE card_payment 
 	(transaction_id number not null,
 	 card_number char(16),
 	 primary key (transaction_id),
-	 foreign key (transaction_id) references payment);
+	 foreign key (transaction_id) references payment(transaction_id));
 grant select on card_payment to public;
- 
+
 CREATE TABLE location
 	(location_address varchar(40) not null,
 	 primary key (location_address));
-
-grant select on location to public;
+	grant select on location to public;
 
 CREATE TABLE rooms
 	(room_number number not null,
@@ -47,8 +47,7 @@ CREATE TABLE rooms
 	 max_occupancy int,
 	 primary key (room_number, location_address),
 	 foreign key (location_address) references location);
-
-grant select on rooms to public;
+ 	grant select on rooms to public;
 
 CREATE TABLE employee
 	(employee_id number not null,
@@ -61,8 +60,17 @@ CREATE TABLE employee
 
 grant select on employee to public;
 
+CREATE TABLE reserves
+	(name varchar(40) not null,
+	 address varchar(40) not null,
+	 location_address varchar(40) not null,
+	 room_number int not null,
+	 primary key (name, address, location_address, room_number),
+	 foreign key (name, address) references customers,
+	 foreign key (location_address) references location,
+	 foreign key (room_number, location_address) references rooms);
 
-
+grant select on reserves to public;
 
 insert into customers
 values('Bennet Abraham', '6223 Bateman St. Berkeley, CA 94705', 54);
@@ -111,3 +119,6 @@ values ('1' , 'James Bond' , '123 Main Street', null);
 
 insert into employee
 values ('2' , 'Austin Powers' , '111 UBC', 1);
+
+insert into reserves
+values ('Bennet Abraham', '6223 Bateman St. Berkeley, CA 94705', '123 Main Street', '1');
