@@ -13,10 +13,10 @@
 					$debug = True;
 					if ($debug) {
 					}
-		  			$db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
+		  			$db_conn = OCILogon("ora_b9y8", "a38319125", "ug");
 					if ($db_conn) {
 						$result = $util2->executePlainSQL("select * from location");
-						$util2->printResultDropdown($result);
+						$util2->printResultDropdown($result, 'LOCATION_ADDRESS');
 						OCILogoff($db_conn);
 					}
 				?>

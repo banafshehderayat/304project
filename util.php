@@ -1,5 +1,6 @@
-html>
+<html>
 <?php
+
 class Util {
 function executeBoundSQL($cmdstr, $list) {
 	/* Sometimes a same statement will be excuted for severl times, only
@@ -7,18 +8,22 @@ function executeBoundSQL($cmdstr, $list) {
 	 In this case you don't need to create the statement several times; 
 	 using bind variables can make the statement be shared and just 
 	 parsed once. This is also very useful in protecting against SQL injection. See example code below for       how this functions is used */
+
 	global $db_conn, $success;
 	$statement = OCIParse($db_conn, $cmdstr);
+
 	if (!$statement) {
 		echo "<br>Cannot parse the following command: " . $cmdstr . "<br>";
 		$e = OCI_Error($db_conn);
 		echo htmlentities($e['message']);
 		$success = False;
 	}
+
 	foreach ($list as $tuple) {
 		foreach ($tuple as $bind => $val) {
 			OCIBindByName($statement, $bind, $val);
 			unset ($val); //make sure you do not remove this. Otherwise $val will remain in an array object wrapper which will not be recognized by Oracle as a proper datatype
+
 		}
 		$r = OCIExecute($statement, OCI_DEFAULT);
 		if (!$r) {
@@ -30,6 +35,7 @@ function executeBoundSQL($cmdstr, $list) {
 		}
 	}
 }
+
 function executePlainSQL($cmdstr) { //takes a plain (no bound variables) SQL command and executes it
 	//echo "<br>running ".$cmdstr."<br>";
 	global $db_conn, $success;
@@ -42,6 +48,7 @@ function executePlainSQL($cmdstr) { //takes a plain (no bound variables) SQL com
 		echo htmlentities($e['message']);
 		$success = False;
 	}
+
 	$r = OCIExecute($statement, OCI_DEFAULT);
 	if (!$r) {
 		echo "<br>Cannot execute the following command: " . $cmdstr . "<br>";
@@ -52,15 +59,16 @@ function executePlainSQL($cmdstr) { //takes a plain (no bound variables) SQL com
 	}
 	return $statement;
 }
+
 function printResultTable($result, $cols) { //prints results from a select statement
-	echo "<br>Got data from table customers:<br>";
 	echo "<table>";
 	echo "<tr>";
+
 	foreach ($cols as &$col) {
 		echo "<th>$col</th>";
 	}
 	echo "</tr>";
-	$int = 0;
+
 	while ($row = OCI_Fetch_Array($result, OCI_BOTH)) {
 		// Row indices MUST BE IN CAPS
 		// echo "<tr><td>" . $row["CNAME"] . "</td><td>" . $row["ADDRESS"] . "</td></tr>"; //or just use "echo $row[0]" 
@@ -71,10 +79,12 @@ function printResultTable($result, $cols) { //prints results from a select state
 		echo "</tr>";
 	}
 	echo "</table>";
+
 }
-function printResultDropdown($result) { //prints results from a select statement
+
+function printResultDropdown($result, $col) { //prints results from a select statement
 	while ($row = OCI_Fetch_Array($result, OCI_BOTH)) {
-			echo "<option>" . $row['LOCATION_ADDRESS'] . "</option>";
+			echo "<option>" . $row[$col] . "</option>";
 		}
 	}
 }
