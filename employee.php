@@ -7,17 +7,20 @@
         <br>
 	Location:
 	<select name="loc">
-  		<?php 
-  			require_once 'util.php';
-  			$util2 = new Util;
-  			$db_conn = OCILogon("ora_b9y8", "a38319125", "ug");
-			if ($db_conn) {
-				$result = $util2->executePlainSQL("select * from location");
-				$util2->printResultDropdown($result);
-				OCILogoff($db_conn);
-			}
-		?>
-	</select>
+		  		<?php 
+		  			require_once 'util.php';
+		  			$util2 = new Util;
+					$debug = True;
+					if ($debug) {
+					}
+		  			$db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
+					if ($db_conn) {
+						$result = $util2->executePlainSQL("select * from location");
+						$util2->printResultDropdown($result);
+						OCILogoff($db_conn);
+					}
+				?>
+			</select>
 	<br>
         <input type="submit" value="View Rooms" name="viewRooms"></p>
 
@@ -69,10 +72,6 @@ if ($db_conn) {
 			echo($stid);
                 	$util->printResultTable($stid , ["ROOM_NUMBER", "LOCATION_ADDRESS", "TYPE", "MAX_OCCUPANCY"]);
                 	OCICommit($db_conn);
-                	if ($debug) {
-                        	$result = $util->executePlainSQL("select * from rooms");
-				$util->printResultTable($result, ["ROOM_NUMBER", "LOCATION_ADDRESS", "TYPE", "MAX_OCCUPANCY"]);
-                	}
 	
 		} else 
 			if (array_key_exists('updateRooms', $_POST)){

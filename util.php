@@ -74,7 +74,7 @@ function printResultTable($result, $cols) { //prints results from a select state
 }
 function printResultDropdown($result) { //prints results from a select statement
 	while ($row = OCI_Fetch_Array($result, OCI_BOTH)) {
-			echo "<option value=\"location1\">" . $row['LOCATION_ADDRESS'] . "</option>";
+			echo "<option>" . $row['LOCATION_ADDRESS'] . "</option>";
 		}
 	}
 }
