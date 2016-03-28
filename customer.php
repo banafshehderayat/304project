@@ -1,6 +1,6 @@
 
 <html>
-<form method="POST" action="main.php">
+<form method="POST" action="customer.php">
 	Customer Name: <input type="text" name="custName"> <br>
 	Customer Address: <input type="text" name="custAddr"> <br>
 	<input type="submit" value="Add Customer" name="addCust"></p>
@@ -15,7 +15,7 @@ require 'util.php';
 $util = new Util;
 $debug = True;
 
-$db_conn = OCILogon("ora_b9y8", "a38319125", "ug");
+$db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
 if ($db_conn) {
 	
 	if ($debug) {
@@ -41,7 +41,7 @@ if ($db_conn) {
 
 	if ($debug) {
 		$result = $util->executePlainSQL("select * from customers");
-		$util->printResult($result);
+		$util->printResultTable($result);
 	}
 
 	OCILogoff($db_conn);
