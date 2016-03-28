@@ -53,7 +53,7 @@ if ($db_conn) {
                 OCIBindByName($stid, ':bind1', $bind1);
                 OCIBindByName($stid, ':bind2', $bind2);
                	OCIExecute($stid);
-                $util->printResult($stid);
+                $util->printResultTable($stid, ["CNAME", "ADDRESS", "CID"]);
                 OCICommit($db_conn);
                 if ($debug) {
                         echo "Customer found\n";
@@ -67,11 +67,11 @@ if ($db_conn) {
                 	OCIBindByName($stid, ':bind', $bind);
                 	OCIExecute($stid);
 			echo($stid);
-                	$util->printResultRooms($stid);
+                	$util->printResultTable($stid , ["ROOM_NUMBER", "LOCATION_ADDRESS", "TYPE", "MAX_OCCUPANCY"]);
                 	OCICommit($db_conn);
                 	if ($debug) {
                         	$result = $util->executePlainSQL("select * from rooms");
-				$util->printResultRooms($result);
+				$util->printResultTable($result, ["ROOM_NUMBER", "LOCATION_ADDRESS", "TYPE", "MAX_OCCUPANCY"]);
                 	}
 	
 		} else 
