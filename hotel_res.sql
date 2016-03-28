@@ -56,6 +56,7 @@ CREATE TABLE employee
 	 name varchar(40) not null,
 	 location_address varchar(40) not null,
 	 manager_id int,
+	 password varchar(255) not null,
 	 primary key (employee_id),
 	 foreign key (location_address) references location,
 	 foreign key (manager_id) references employee);
@@ -64,12 +65,14 @@ grant select on employee to public;
 
 
 
-
+--> Password is hashed versions of the string 'ccc' <---
 insert into customers
-values('Bennet Abraham', '6223 Bateman St. Berkeley, CA 94705', 54, 'aaa');
+values('Bennet Abraham', '6223 Bateman St. Berkeley, CA 94705', 54, 
+	'$2y$10$GU5jDoFrdUDG90aKuMfNRel4JadmBhmxISoWtj60LABsoBpr2j8sW');
  
 insert into customers
-values ('Majorie Green', '309 63rd St. #411, Oakland, CA 94618', 21, 'aaa');
+values ('Majorie Green', '309 63rd St. #411, Oakland, CA 94618', 21, 
+	'$2y$10$GU5jDoFrdUDG90aKuMfNRel4JadmBhmxISoWtj60LABsoBpr2j8sW');
 
 insert into payment
 values(0736, 40);
@@ -107,8 +110,11 @@ values ('1', '123 Main Street', 'Penthouse Suite', '8');
 insert into rooms
 values ('2', '111 UBC', 'King Room', '4');
 
+--> Password is hashed versions of the string 'eee' <---
 insert into employee
-values ('1' , 'James Bond' , '123 Main Street', null);
+values ('1' , 'James Bond' , '123 Main Street', null, 
+	'$2y$10$C4/RI35R3Th/E/dTMW6OgeY9sEaCN.qNJZAW151XEPZABk6f68npu');
 
 insert into employee
-values ('2' , 'Austin Powers' , '111 UBC', 1);
+values ('2' , 'Austin Powers' , '111 UBC', 1, 
+	'$2y$10$C4/RI35R3Th/E/dTMW6OgeY9sEaCN.qNJZAW151XEPZABk6f68npu');

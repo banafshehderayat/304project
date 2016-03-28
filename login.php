@@ -4,17 +4,17 @@ ini_set('display_errors',1);
 
 
 /**
- * Class OneFileLoginApplication
+ * Class Login
  *
- * An entire php application with user registration, login and logout in one file.
- * Uses very modern password hashing via the PHP 5.5 password hashing functions.
- * This project includes a compatibility file to make these functions available in PHP 5.3.7+ and PHP 5.4+.
- *
+ * PHP login class heavily based on:
  * @author Panique
  * @link https://github.com/panique/php-login-one-file/
  * @license http://opensource.org/licenses/MIT MIT License
+ *
+ * Class has been edited to suit our needs for a hotel reservation system. 
+ *
  */
-class OneFileLoginApplication
+class Login
 {
     /**
      * @var object Database connection
@@ -65,7 +65,7 @@ class OneFileLoginApplication
     }
 
     /**
-     * Creates a PDO database connection (in this case to a SQLite flat-file database)
+     * Establishes database connection using OCI methods.
      * @return bool Database creation success status, false by default
      */
     private function createDatabaseConnection()
@@ -89,7 +89,7 @@ class OneFileLoginApplication
     {
         if (isset($_GET["action"]) && $_GET["action"] == "logout") {
             $this->doLogout();
-        } elseif (!empty($_SESSION['cid']) && ($_SESSION['user_is_logged_in'])) {
+        } elseif (!empty($_SESSION['id']) && ($_SESSION['user_is_logged_in'])) {
             $this->doLoginWithSessionData();
         } elseif (isset($_POST["login"])) {
             $this->doLoginWithPostData();
@@ -149,7 +149,7 @@ class OneFileLoginApplication
     {
         if ($this->checkRegistrationData()) {
             if ($this->createDatabaseConnection()) {
-                $this->createNewUser();
+                $this->createNewCustomer();
             }
         }
         // default return
@@ -184,7 +184,34 @@ class OneFileLoginApplication
      */
     private function checkPasswordCorrectnessAndLogin()
     {
-        // Customer login
+        if ($this->checkCustomerLogin()) {
+            if ($this->user_is_logged_in) {
+                // TODO: commented out for now, but perhaps this is an option for redirecting onto
+                //       appropriate customer/employee/manager page
+                // echo "<meta http-equiv=\"refresh\" content=\"0; URL='http://www.google.com'\" />";
+                return true;
+            }
+        }
+        elseif ($this->checkEmployeeLogin()) {
+            if ($this->user_is_logged_in) {
+                // TODO: commented out for now, but perhaps this is an option for redirecting onto
+                //       appropriate customer/employee/manager page
+                // echo "<meta http-equiv=\"refresh\" content=\"0; URL='http://www.google.com'\" />";
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * Checks if user is a customer.
+     * If provided name, address match an entry in the customer table,
+     * @return true
+     *
+     * NOTE, method will return true even if the password is wrong, as the user is a customer.
+     */
+    private function checkCustomerLogin() {
         $sql = 'SELECT * FROM customers WHERE cname =:bind1 and address = :bind2';
         $statement = oci_parse($this->db_connection, $sql);
 
@@ -202,25 +229,65 @@ class OneFileLoginApplication
 
         $row = oci_fetch_array($statement);
         if ($row) {
-            // Row exists, so a customer by this name and address must exist.
             // Now, check if the password matches
             if (password_verify($_POST['password'], $row['PASSWORD'])) {
                 $_SESSION['user_type'] = 'CUSTOMER';
-                $_SESSION['cid'] = $row['CID'];
+                $_SESSION['id'] = $row['CID'];
                 $_SESSION['user_is_logged_in'] = true;
                 $this->user_is_logged_in = true;
-                
-                // TODO: commented out for now, but perhaps this is an option for redirecting onto
-                //       appropriate customer/employee/manager page
-                // echo "<meta http-equiv=\"refresh\" content=\"0; URL='http://www.google.com'\" />";
             }
             else {
                 $this->feedback = "Wrong password.";
             }
+
+            // Row exists, so a customer by this name and address must exist.
+            return true;
         }
-        
+
         return false;
-        // TODO: if not a customer, check if it is an employee logging in
+    }
+
+    /**
+     * Checks if user is an employee.
+     * If provided name and location match an entry in the employee table,
+     * @return true
+     *
+     * NOTE, method will return true even if the password is wrong, as the user is a employee.
+     */
+    private function checkEmployeeLogin() {
+        $sql = 'SELECT * FROM employee WHERE name =:bind1 and location_address = :bind2';
+        $statement = oci_parse($this->db_connection, $sql);
+
+        ocibindbyname($statement, ':bind1', $_POST['name']);
+        ocibindbyname($statement, ':bind2', $_POST['address']);
+
+        $r = OCIExecute($statement, OCI_DEFAULT);
+        if (!$r) {
+            echo "<br>Cannot execute the following command: " . $cmdstr . "<br>";
+            $e = OCI_Error($statement); // For OCIExecute errors pass the statementhandle
+            echo htmlentities($e['message']);
+            echo "<br>";
+        }
+        OCICommit($this->db_connection);
+
+        $row = oci_fetch_array($statement);
+        if ($row) {
+            // Now, check if the password matches
+            if (password_verify($_POST['password'], $row['PASSWORD'])) {
+                $_SESSION['user_type'] = 'EMPLOYEE';
+                $_SESSION['id'] = $row['EMPLOYEE_ID'];
+                $_SESSION['user_is_logged_in'] = true;
+                $this->user_is_logged_in = true;
+            }
+            else {
+                $this->feedback = "Wrong password.";
+            }
+
+            // Row exists, so an employee by this name and location must exist.
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -238,7 +305,7 @@ class OneFileLoginApplication
         if (!empty($_POST['name'])
             && !empty($_POST['address'])
             && !empty($_POST['password_new'])
-            && strlen($_POST['password_new']) >= 6
+            && strlen($_POST['password_new']) >= 3
             && !empty($_POST['password_repeat'])
             && ($_POST['password_new'] === $_POST['password_repeat'])
         ) {
@@ -250,8 +317,8 @@ class OneFileLoginApplication
             $this->feedback = "Empty Password";
         } elseif ($_POST['password_new'] !== $_POST['password_repeat']) {
             $this->feedback = "Password and password repeat are not the same";
-        } elseif (strlen($_POST['password_new']) < 6) {
-            $this->feedback = "Password has a minimum length of 6 characters";
+        } elseif (strlen($_POST['password_new']) < 3) {
+            $this->feedback = "Password has a minimum length of 3 characters";
         } elseif (empty($_POST['address'])) {
             $this->feedback = "Address cannot be empty";
         } else {
@@ -263,16 +330,17 @@ class OneFileLoginApplication
     }
 
     /**
-     * Creates a new user.
-     * @return bool Success status of user registration
+     * Creates a new customer.
+     * @return bool Success status of customer registration
      */
-    private function createNewUser()
+    private function createNewCustomer()
     {
         $name = htmlentities($_POST['name'], ENT_QUOTES);
         $address = htmlentities($_POST['address'], ENT_QUOTES);
         $password = $_POST['password_new'];
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
+        // make sure no other customer already exists with cid
         do {
             $cid = rand(0, 1023);
             $sql = 'SELECT * FROM customers WHERE cid =:bind';
@@ -284,9 +352,6 @@ class OneFileLoginApplication
         }
         while ($row = oci_fetch_array($statement));
 
-
-        // cid is unique, no customer exists with it.
-        // TODO; Check whether address is a hotel location; if so, insert into employees instead of customers
 
         $sql = 'insert into customers values (:cname, :addr, :cid, :pw)';
         $statement = ociparse($this->db_connection, $sql);
@@ -381,18 +446,18 @@ class OneFileLoginApplication
         echo '<label for="login_input_email">Address</label>';
         echo '<input id="login_input_email" type="text" name="address" required />';
         echo '<br>';
-        echo '<label for="login_input_password_new">Password (min. 6 characters)</label>';
-        echo '<input id="login_input_password_new" class="login_input" type="password" name="password_new" pattern=".{6,}" required autocomplete="off" />';
+        echo '<label for="login_input_password_new">Password (min. 3 characters)</label>';
+        echo '<input id="login_input_password_new" class="login_input" type="password" name="password_new" pattern=".{3,}" required autocomplete="off" />';
         echo '<br>';
         echo '<label for="login_input_password_repeat">Repeat password</label>';
-        echo '<input id="login_input_password_repeat" class="login_input" type="password" name="password_repeat" pattern=".{6,}" required autocomplete="off" />';
+        echo '<input id="login_input_password_repeat" class="login_input" type="password" name="password_repeat" pattern=".{3,}" required autocomplete="off" />';
         echo '<br>';
         echo '<input type="submit" name="register" value="Register" />';
         echo '</form>';
 
-        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '">Homepage</a>';
+        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '">Log In</a>';
     }
 }
 
-// run the application
-$application = new OneFileLoginApplication();
+// Start login
+$login = new Login();
