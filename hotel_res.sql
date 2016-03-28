@@ -10,6 +10,7 @@ create table customers
 	(cname varchar(40) not null,
 	 address varchar(40) not null,
 	 cid number not null unique,
+	 password varchar(255) not null,
 	 primary key (cname, address));
  
 grant select on customers to public;
@@ -52,8 +53,8 @@ grant select on rooms to public;
 
 CREATE TABLE employee
 	(employee_id number not null,
-	 name varchar(40),
-	 location_address varchar(40),
+	 name varchar(40) not null,
+	 location_address varchar(40) not null,
 	 manager_id int,
 	 primary key (employee_id),
 	 foreign key (location_address) references location,
@@ -65,10 +66,10 @@ grant select on employee to public;
 
 
 insert into customers
-values('Bennet Abraham', '6223 Bateman St. Berkeley, CA 94705', 54);
+values('Bennet Abraham', '6223 Bateman St. Berkeley, CA 94705', 54, 'aaa');
  
 insert into customers
-values ('Majorie Green', '309 63rd St. #411, Oakland, CA 94618', 21);
+values ('Majorie Green', '309 63rd St. #411, Oakland, CA 94618', 21, 'aaa');
 
 insert into payment
 values(0736, 40);

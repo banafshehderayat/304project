@@ -33,34 +33,12 @@ class OneFileLoginApplication
 
 
     /**
-     * Does necessary checks for PHP version and PHP password compatibility library and runs the application
+     * Run Application as soon as it's created
      */
     public function __construct()
     {
-        if ($this->performMinimumRequirementsCheck()) {
-            $this->runApplication();
-        }
-    }
-
-    /**
-     * Performs a check for minimum requirements to run this application.
-     * Does not run the further application when PHP version is lower than 5.3.7
-     * Does include the PHP password compatibility library when PHP version lower than 5.5.0
-     * (this library adds the PHP 5.5 password hashing functions to older versions of PHP)
-     * @return bool Success status of minimum requirements check, default is false
-     */
-    private function performMinimumRequirementsCheck()
-    {
-        if (version_compare(PHP_VERSION, '5.3.7', '<')) {
-            echo "Sorry, Simple PHP Login does not run on a PHP version older than 5.3.7 !";
-        } elseif (version_compare(PHP_VERSION, '5.5.0', '<')) {
-            require_once("password_compatibility_library.php");
-            return true;
-        } elseif (version_compare(PHP_VERSION, '5.5.0', '>=')) {
-            return true;
-        }
-        // default return
-        return false;
+        require_once("password_compatibility_library.php");
+        $this->runApplication();
     }
 
     /**
@@ -92,8 +70,8 @@ class OneFileLoginApplication
      */
     private function createDatabaseConnection()
     {
-        $db_connection = OCILogon("ora_b9y8", "a38319125", "ug");
-        if ($db_connection) {
+        $this->db_connection = OCILogon("ora_b9y8", "a38319125", "ug");
+        if ($this->db_connection) {
             return true;
         }
         else {
@@ -111,7 +89,7 @@ class OneFileLoginApplication
     {
         if (isset($_GET["action"]) && $_GET["action"] == "logout") {
             $this->doLogout();
-        } elseif (!empty($_SESSION['user_name']) && ($_SESSION['user_is_logged_in'])) {
+        } elseif (!empty($_SESSION['cid']) && ($_SESSION['user_is_logged_in'])) {
             $this->doLoginWithSessionData();
         } elseif (isset($_POST["login"])) {
             $this->doLoginWithPostData();
@@ -119,8 +97,10 @@ class OneFileLoginApplication
     }
 
     /**
-     * Simply starts the session.
-     * It's cleaner to put this into a method than writing it directly into runApplication()
+     * Starts the session.
+     * SETUP INSTRUCTIONS FOR JAS AND BANAFSHEH: 
+     *      1. create a php_sessions directory in public_html
+     *      2. chmod 755 it. 
      */
     private function doStartSession()
     {
@@ -182,15 +162,20 @@ class OneFileLoginApplication
      */
     private function checkLoginFormDataNotEmpty()
     {
-        if (!empty($_POST['user_name']) && !empty($_POST['user_password'])) {
-            return true;
-        } elseif (empty($_POST['user_name'])) {
-            $this->feedback = "Username field was empty.";
-        } elseif (empty($_POST['user_password'])) {
-            $this->feedback = "Password field was empty.";
+        if (empty($_POST['name'])) {
+            $this->feedback = "Name field was empty.";
+            return false;
         }
-        // default return
-        return false;
+        elseif (empty($_POST['address'])) {
+            $this->feedback = "Address field was empty.";
+            return false;
+        }
+        elseif (empty($_POST['password'])) {
+            $this->feedback = "Password field was empty.";
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -199,64 +184,42 @@ class OneFileLoginApplication
      */
     private function checkPasswordCorrectnessAndLogin()
     {
-        /* THE ORIGINAL CODE
-        // remember: the user can log in with username or email address
-        $sql = 'SELECT user_name, user_email, user_password_hash
-                FROM users
-                WHERE user_name = :user_name OR user_email = :user_name
-                LIMIT 1';
-        $query = $this->db_connection->prepare($sql);
-        $query->bindValue(':user_name', $_POST['user_name']);
-        $query->execute();
-
-        // Btw that's the weird way to get num_rows in PDO with SQLite:
-        // if (count($query->fetchAll(PDO::FETCH_NUM)) == 1) {
-        // Holy! But that's how it is. $result->numRows() works with SQLite pure, but not with SQLite PDO.
-        // This is so crappy, but that's how PDO works.
-        // As there is no numRows() in SQLite/PDO (!!) we have to do it this way:
-        // If you meet the inventor of PDO, punch him. Seriously.
-        $result_row = $query->fetchObject();
-        if ($result_row) {
-            // using PHP 5.5's password_verify() function to check password
-            if (password_verify($_POST['user_password'], $result_row->user_password_hash)) {
-                // write user data into PHP SESSION [a file on your server]
-                $_SESSION['user_name'] = $result_row->user_name;
-                $_SESSION['user_email'] = $result_row->user_email;
-                $_SESSION['user_is_logged_in'] = true;
-                $this->user_is_logged_in = true;
-                return true;
-            } else {
-                $this->feedback = "Wrong password.";
-            }
-        } else {
-            $this->feedback = "This user does not exist.";
-        }
-        // default return
-        return false;*/
-
         // Customer login
         $sql = 'SELECT * FROM customers WHERE cname =:bind1 and address = :bind2';
-        $statement = oci_parse($db_connection, $sql);
+        $statement = oci_parse($this->db_connection, $sql);
 
-        ocibindbyname($statement, ':bind1', $_POST['custName']);
-        ocibindbyname($statement, ':bind2', $_POST['custAddr']);
+        ocibindbyname($statement, ':bind1', $_POST['name']);
+        ocibindbyname($statement, ':bind2', $_POST['address']);
 
-        $row = oci_fetch_array($statment);
-        // Row exists, so a customer by this name and address must exist.
-        // Now, check if the password matches
+        $r = OCIExecute($statement, OCI_DEFAULT);
+        if (!$r) {
+            echo "<br>Cannot execute the following command: " . $cmdstr . "<br>";
+            $e = OCI_Error($statement); // For OCIExecute errors pass the statementhandle
+            echo htmlentities($e['message']);
+            echo "<br>";
+        }
+        OCICommit($this->db_connection);
+
+        $row = oci_fetch_array($statement);
         if ($row) {
-            if (password_verify($_POST['user_password'], $row['PASSWORD'])) {
+            // Row exists, so a customer by this name and address must exist.
+            // Now, check if the password matches
+            if (password_verify($_POST['password'], $row['PASSWORD'])) {
                 $_SESSION['user_type'] = 'CUSTOMER';
                 $_SESSION['cid'] = $row['CID'];
                 $_SESSION['user_is_logged_in'] = true;
                 $this->user_is_logged_in = true;
-                return true;
+                
+                // TODO: commented out for now, but perhaps this is an option for redirecting onto
+                //       appropriate customer/employee/manager page
+                // echo "<meta http-equiv=\"refresh\" content=\"0; URL='http://www.google.com'\" />";
             }
             else {
                 $this->feedback = "Wrong password.";
             }
         }
         
+        return false;
         // TODO: if not a customer, check if it is an employee logging in
     }
 
@@ -272,38 +235,25 @@ class OneFileLoginApplication
         }
 
         // validating the input
-        if (!empty($_POST['user_name'])
-            && strlen($_POST['user_name']) <= 64
-            && strlen($_POST['user_name']) >= 2
-            && preg_match('/^[a-z\d]{2,64}$/i', $_POST['user_name'])
-            && !empty($_POST['user_email'])
-            && strlen($_POST['user_email']) <= 64
-            && filter_var($_POST['user_email'], FILTER_VALIDATE_EMAIL)
-            && !empty($_POST['user_password_new'])
-            && strlen($_POST['user_password_new']) >= 6
-            && !empty($_POST['user_password_repeat'])
-            && ($_POST['user_password_new'] === $_POST['user_password_repeat'])
+        if (!empty($_POST['name'])
+            && !empty($_POST['address'])
+            && !empty($_POST['password_new'])
+            && strlen($_POST['password_new']) >= 6
+            && !empty($_POST['password_repeat'])
+            && ($_POST['password_new'] === $_POST['password_repeat'])
         ) {
             // only this case return true, only this case is valid
             return true;
-        } elseif (empty($_POST['user_name'])) {
+        } elseif (empty($_POST['name'])) {
             $this->feedback = "Empty Username";
-        } elseif (empty($_POST['user_password_new']) || empty($_POST['user_password_repeat'])) {
+        } elseif (empty($_POST['password_new']) || empty($_POST['password_repeat'])) {
             $this->feedback = "Empty Password";
-        } elseif ($_POST['user_password_new'] !== $_POST['user_password_repeat']) {
+        } elseif ($_POST['password_new'] !== $_POST['password_repeat']) {
             $this->feedback = "Password and password repeat are not the same";
-        } elseif (strlen($_POST['user_password_new']) < 6) {
+        } elseif (strlen($_POST['password_new']) < 6) {
             $this->feedback = "Password has a minimum length of 6 characters";
-        } elseif (strlen($_POST['user_name']) > 64 || strlen($_POST['user_name']) < 2) {
-            $this->feedback = "Username cannot be shorter than 2 or longer than 64 characters";
-        } elseif (!preg_match('/^[a-z\d]{2,64}$/i', $_POST['user_name'])) {
-            $this->feedback = "Username does not fit the name scheme: only a-Z and numbers are allowed, 2 to 64 characters";
-        } elseif (empty($_POST['user_email'])) {
-            $this->feedback = "Email cannot be empty";
-        } elseif (strlen($_POST['user_email']) > 64) {
-            $this->feedback = "Email cannot be longer than 64 characters";
-        } elseif (!filter_var($_POST['user_email'], FILTER_VALIDATE_EMAIL)) {
-            $this->feedback = "Your email address is not in a valid email format";
+        } elseif (empty($_POST['address'])) {
+            $this->feedback = "Address cannot be empty";
         } else {
             $this->feedback = "An unknown error occurred.";
         }
@@ -318,45 +268,44 @@ class OneFileLoginApplication
      */
     private function createNewUser()
     {
-        // remove html code etc. from username and email
-        $user_name = htmlentities($_POST['user_name'], ENT_QUOTES);
-        $user_email = htmlentities($_POST['user_email'], ENT_QUOTES);
-        $user_password = $_POST['user_password_new'];
-        // crypt the user's password with the PHP 5.5's password_hash() function, results in a 60 char hash string.
-        // the constant PASSWORD_DEFAULT comes from PHP 5.5 or the password_compatibility_library
-        $user_password_hash = password_hash($user_password, PASSWORD_DEFAULT);
+        $name = htmlentities($_POST['name'], ENT_QUOTES);
+        $address = htmlentities($_POST['address'], ENT_QUOTES);
+        $password = $_POST['password_new'];
+        $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
-        $sql = 'SELECT * FROM users WHERE user_name = :user_name OR user_email = :user_email';
-        $query = $this->db_connection->prepare($sql);
-        $query->bindValue(':user_name', $user_name);
-        $query->bindValue(':user_email', $user_email);
-        $query->execute();
+        do {
+            $cid = rand(0, 1023);
+            $sql = 'SELECT * FROM customers WHERE cid =:bind';
+            $statement = oci_parse($this->db_connection, $sql);
+            ocibindbyname($statement, ':bind', $cid);
 
-        // As there is no numRows() in SQLite/PDO (!!) we have to do it this way:
-        // If you meet the inventor of PDO, punch him. Seriously.
-        $result_row = $query->fetchObject();
-        if ($result_row) {
-            $this->feedback = "Sorry, that username / email is already taken. Please choose another one.";
-        } else {
-            $sql = 'INSERT INTO users (user_name, user_password_hash, user_email)
-                    VALUES(:user_name, :user_password_hash, :user_email)';
-            $query = $this->db_connection->prepare($sql);
-            $query->bindValue(':user_name', $user_name);
-            $query->bindValue(':user_password_hash', $user_password_hash);
-            $query->bindValue(':user_email', $user_email);
-            // PDO's execute() gives back TRUE when successful, FALSE when not
-            // @link http://stackoverflow.com/q/1661863/1114320
-            $registration_success_state = $query->execute();
-
-            if ($registration_success_state) {
-                $this->feedback = "Your account has been created successfully. You can now log in.";
-                return true;
-            } else {
-                $this->feedback = "Sorry, your registration failed. Please go back and try again.";
-            }
+            OCIExecute($statement, OCI_DEFAULT);
+            OCICommit($this->db_connection);
         }
-        // default return
-        return false;
+        while ($row = oci_fetch_array($statement));
+
+
+        // cid is unique, no customer exists with it.
+        // TODO; Check whether address is a hotel location; if so, insert into employees instead of customers
+
+        $sql = 'insert into customers values (:cname, :addr, :cid, :pw)';
+        $statement = ociparse($this->db_connection, $sql);
+
+        ocibindbyname($statement, ':cname', $name);
+        ocibindbyname($statement, ':addr', $address);
+        ocibindbyname($statement, ':cid', $cid);
+        ocibindbyname($statement, ':pw', $password_hash);
+
+        OCIExecute($statement, OCI_DEFAULT);
+        $registration_success_state = OCICommit($this->db_connection);
+
+        if ($registration_success_state) {
+            $this->feedback = "Your account has been created successfully. You can now log in.";
+        } else {
+            $this->feedback = "Sorry, your registration failed. Please go back and try again.";
+        }
+
+        return $registration_success_state;
     }
 
     /**
@@ -379,7 +328,7 @@ class OneFileLoginApplication
             echo $this->feedback . "<br/><br/>";
         }
 
-        echo 'Hello ' . $_SESSION['user_name'] . ', you are logged in.<br/><br/>';
+        echo 'Hello ' . $_SESSION['user_type'] . ', you are logged in.<br/><br/>';
         echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=logout">Log out</a>';
     }
 
@@ -397,10 +346,15 @@ class OneFileLoginApplication
         echo '<h2>Login</h2>';
 
         echo '<form method="post" action="' . $_SERVER['SCRIPT_NAME'] . '" name="loginform">';
-        echo '<label for="login_input_username">Username (or email)</label> ';
-        echo '<input id="login_input_username" type="text" name="user_name" required /> ';
+        echo '<label for="login_input_username">Name</label> ';
+        echo '<input id="login_input_username" type="text" name="name" required /> ';
+        echo '<br>';
+        echo '<label for="login_input_address">Address</label> ';
+        echo '<input id="login_input_uaddress" type="text" name="address" required /> ';
+        echo '<br>';
         echo '<label for="login_input_password">Password</label> ';
-        echo '<input id="login_input_password" type="password" name="user_password" required /> ';
+        echo '<input id="login_input_password" type="password" name="password" required /> ';
+        echo '<br>';
         echo '<input type="submit"  name="login" value="Log in" />';
         echo '</form>';
 
@@ -421,14 +375,18 @@ class OneFileLoginApplication
         echo '<h2>Registration</h2>';
 
         echo '<form method="post" action="' . $_SERVER['SCRIPT_NAME'] . '?action=register" name="registerform">';
-        echo '<label for="login_input_username">Username (only letters and numbers, 2 to 64 characters)</label>';
-        echo '<input id="login_input_username" type="text" pattern="[a-zA-Z0-9]{2,64}" name="user_name" required />';
-        echo '<label for="login_input_email">User\'s email</label>';
-        echo '<input id="login_input_email" type="email" name="user_email" required />';
+        echo '<label for="login_input_username">Name</label>';
+        echo '<input id="login_input_username" type="text" name="name" required />';
+        echo '<br>';
+        echo '<label for="login_input_email">Address</label>';
+        echo '<input id="login_input_email" type="text" name="address" required />';
+        echo '<br>';
         echo '<label for="login_input_password_new">Password (min. 6 characters)</label>';
-        echo '<input id="login_input_password_new" class="login_input" type="password" name="user_password_new" pattern=".{6,}" required autocomplete="off" />';
+        echo '<input id="login_input_password_new" class="login_input" type="password" name="password_new" pattern=".{6,}" required autocomplete="off" />';
+        echo '<br>';
         echo '<label for="login_input_password_repeat">Repeat password</label>';
-        echo '<input id="login_input_password_repeat" class="login_input" type="password" name="user_password_repeat" pattern=".{6,}" required autocomplete="off" />';
+        echo '<input id="login_input_password_repeat" class="login_input" type="password" name="password_repeat" pattern=".{6,}" required autocomplete="off" />';
+        echo '<br>';
         echo '<input type="submit" name="register" value="Register" />';
         echo '</form>';
 
