@@ -213,7 +213,7 @@ class Login
 
         $r = OCIExecute($statement, OCI_DEFAULT);
         if (!$r) {
-            echo "<br>Cannot execute the following command: " . $cmdstr . "<br>";
+            echo "<br>Cannot execute the following command: " . $sql . "<br>";
             $e = OCI_Error($statement); // For OCIExecute errors pass the statementhandle
             echo htmlentities($e['message']);
             echo "<br>";
@@ -256,7 +256,7 @@ class Login
 
         $r = OCIExecute($statement, OCI_DEFAULT);
         if (!$r) {
-            echo "<br>Cannot execute the following command: " . $cmdstr . "<br>";
+            echo "<br>Cannot execute the following command: " . $sql . "<br>";
             $e = OCI_Error($statement); // For OCIExecute errors pass the statementhandle
             echo htmlentities($e['message']);
             echo "<br>";
