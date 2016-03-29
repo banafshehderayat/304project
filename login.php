@@ -70,7 +70,7 @@ class Login
      */
     private function createDatabaseConnection()
     {
-        $this->db_connection = OCILogon("ora_b9y8", "a38319125", "ug");
+        $this->db_connection = OCILogon("ora_j7l8", "a31501125", "ug");
         if ($this->db_connection) {
             return true;
         }
