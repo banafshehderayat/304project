@@ -96,17 +96,9 @@
 				}
 				else
 				{ // otherwise proceed
-						//cash payment
-						if ($_POST['paymentType'] == "Cash") {
-							addCashPayment($amount, $util, $db_conn, $debug);
-						}
-						else //card payment
-						{
-							addCardPayment($amount, $_POST['cardNo'], $util, $db_conn, $debug);
-						}
 
-						// check if customer exists
-						$statement = 'SELECT * FROM customers WHERE cname = :bind1 and address = :bind2';
+				// check if customer exists
+				$statement = 'SELECT * FROM customers WHERE cname = :bind1 and address = :bind2';
 		        $stid = oci_parse($db_conn, $statement);
 		        $bind1 = $_POST['custName'];
 		        $bind2 = $_POST['custAddr'];
@@ -116,157 +108,166 @@
 
 		        // if so, insert all values into reserves.
 		        if (oci_fetch_array($stid, OCI_BOTH) != false) {
-							insertIntoReserves($_POST, $util, $db_conn);
-						}
-						else // otherwise, add customer to customer db first, then insert all values into reserves
-						{
-							insertIntoCustomers($_POST, $util, $db_conn);
-							if ($debug) { echo "Customer added<br>"; }
-							insertIntoReserves($_POST, $util, $db_conn);
-						}
-
-						echo "<h2>Reservation added!</h2>";
+					//cash payment
+					if ($_POST['paymentType'] == "Cash") {
+						addCashPayment($amount, $util, $db_conn, $debug);
+					}
+					else //card payment
+					{
+						addCardPayment($amount, $_POST['cardNo'], $util, $db_conn, $debug);
+					}
+					
+					insertIntoReserves($_POST, $util, $db_conn);
+					echo "<h2>Reservation added!</h2>";
 				}
-			} else if (array_key_exists('checkCost', $_POST)) {
-				calculatePayment($_POST, $db_conn);
+				else // otherwise, advise user to register
+				{
+					echo '<h2 style="color:#ff0000">Either something is wrong with the customer info you entered, or you have not registered!</h2><h2>Please click the login link in the nav to register if so.</h2>';
+					// insertIntoCustomers($_POST, $util, $db_conn);
+					// if ($debug) { echo "Customer added<br>"; }
+					// insertIntoReserves($_POST, $util, $db_conn);
+				}
 			}
-
-			if ($debug) {
-				$result = $util->executePlainSQL("select * from customers");
-				$util->printResultTable($result, ["CNAME", "ADDRESS", "CID"]);
-
-				$result = $util->executePlainSQL("select * from payment");
-				$util->printResultTable($result, ["TRANSACTION_ID", "AMOUNT"]);
-
-				$result = $util->executePlainSQL("select * from cash_payment");
-				$util->printResultTable($result, ["TRANSACTION_ID"]);
-
-				$result = $util->executePlainSQL("select * from card_payment");
-				$util->printResultTable($result, ["TRANSACTION_ID", "CARD_NUMBER"]);
-
-				$result = $util->executePlainSQL("select * from reserves");
-				$util->printResultTable($result, ["NAME", "ADDRESS", "LOCATION_ADDRESS", "ROOM_NUMBER", "TRANSACTION_ID", "START_DATE", "END_DATE"]);
-			}
-
-			OCILogoff($db_conn);
-		}
-		else
-		{
-			$err = OCIError();
-			echo "Oracle Connect Error" . $err['message'];
+		} else if (array_key_exists('checkCost', $_POST)) {
+			calculatePayment($_POST, $db_conn);
 		}
 
-		function addCashPayment($amount, $util, $db_conn, $debug) {
-			if ($debug) {
-				echo "Cash payment selected <br>";
-			}
+		if ($debug) {
+			$result = $util->executePlainSQL("select * from customers");
+			$util->printResultTable($result, ["CNAME", "ADDRESS", "CID"]);
 
-			addPayment($amount, $util, $db_conn, $debug);
+			$result = $util->executePlainSQL("select * from payment");
+			$util->printResultTable($result, ["TRANSACTION_ID", "AMOUNT"]);
 
-			$tuple = array (
-				":bind1" => null
-			);
-			$allTuple = array (
-				$tuple
-			);
+			$result = $util->executePlainSQL("select * from cash_payment");
+			$util->printResultTable($result, ["TRANSACTION_ID"]);
 
-			$util->executeBoundSQL("insert into cash_payment values (:bind1)", $allTuple);
-			OCICommit($db_conn);
+			$result = $util->executePlainSQL("select * from card_payment");
+			$util->printResultTable($result, ["TRANSACTION_ID", "CARD_NUMBER"]);
+
+			$result = $util->executePlainSQL("select * from reserves");
+			$util->printResultTable($result, ["NAME", "ADDRESS", "LOCATION_ADDRESS", "ROOM_NUMBER", "TRANSACTION_ID", "START_DATE", "END_DATE"]);
 		}
 
-		function addCardPayment($amount, $card, $util, $db_conn, $debug) {
-			if ($debug) {
-				echo "Card payment selected <br>";
-			}
+		OCILogoff($db_conn);
+	}
+	else
+	{
+		$err = OCIError();
+		echo "Oracle Connect Error" . $err['message'];
+	}
 
-			addPayment($amount, $util, $db_conn, $debug);
-
-			$tuple = array (
-				":bind1" => null,
-				":bind2" => $card
-			);
-			$allTuple = array (
-				$tuple
-			);
-
-			$util->executeBoundSQL("insert into card_payment values (:bind1, :bind2)", $allTuple);
-			OCICommit($db_conn);
+	function addCashPayment($amount, $util, $db_conn, $debug) {
+		if ($debug) {
+			echo "Cash payment selected <br>";
 		}
 
-		function addPayment($amount, $util, $db_conn, $debug) {
-			$tuple = array (
-				":bind1" => null,
-				":bind2" => $amount
-			);
-			$allTuple = array (
-				$tuple
-			);
+		addPayment($amount, $util, $db_conn, $debug);
 
-			$util->executeBoundSQL("insert into payment values (:bind1, :bind2)", $allTuple);
-			OCICommit($db_conn);
+		$tuple = array (
+			":bind1" => null
+		);
+		$allTuple = array (
+			$tuple
+		);
 
-			if ($debug) {
-				echo "Payment added <br>";
-			}
+		$util->executeBoundSQL("insert into cash_payment values (:bind1)", $allTuple);
+		OCICommit($db_conn);
+	}
+
+	function addCardPayment($amount, $card, $util, $db_conn, $debug) {
+		if ($debug) {
+			echo "Card payment selected <br>";
 		}
 
-		function insertIntoReserves($array, $util, $db_conn) {
-			$tuple = array (
-					":bind1" => $array['custName'],
-					":bind2" => $array['custAddr'],
-					":bind3" => $array['loc'],
-					":bind4" => $array['room'],
-					":bind5" => null,
-					":bind6" => $array['startDate'],
-					":bind7" => $array['endDate']
-				);
-			$allTuple = array (
-				$tuple
-			);
+		addPayment($amount, $util, $db_conn, $debug);
 
-			$util->executeBoundSQL("insert into reserves values (:bind1, :bind2, :bind3, :bind4, :bind5, :bind6, :bind7)", $allTuple);
-			OCICommit($db_conn);
+		$tuple = array (
+			":bind1" => null,
+			":bind2" => $card
+		);
+		$allTuple = array (
+			$tuple
+		);
+
+		$util->executeBoundSQL("insert into card_payment values (:bind1, :bind2)", $allTuple);
+		OCICommit($db_conn);
+	}
+
+	function addPayment($amount, $util, $db_conn, $debug) {
+		$tuple = array (
+			":bind1" => null,
+			":bind2" => $amount
+		);
+		$allTuple = array (
+			$tuple
+		);
+
+		$util->executeBoundSQL("insert into payment values (:bind1, :bind2)", $allTuple);
+		OCICommit($db_conn);
+
+		if ($debug) {
+			echo "Payment added <br>";
 		}
+	}
 
-		function insertIntoCustomers($array, $util, $db_conn) {
-			$tuple = array (
+	function insertIntoReserves($array, $util, $db_conn) {
+		$tuple = array (
 				":bind1" => $array['custName'],
 				":bind2" => $array['custAddr'],
-				":bind3" => null,
-				":bind4" => "JOIefE"
+				":bind3" => $array['loc'],
+				":bind4" => $array['room'],
+				":bind5" => null,
+				":bind6" => $array['startDate'],
+				":bind7" => $array['endDate']
 			);
-			$allTuple = array (
-				$tuple
-			);
+		$allTuple = array (
+			$tuple
+		);
 
-			$util->executeBoundSQL("insert into customers values (:bind1, :bind2, :bind3, :bind4)", $allTuple);
-			OCICommit($db_conn);
-		}
+		$util->executeBoundSQL("insert into reserves values (:bind1, :bind2, :bind3, :bind4, :bind5, :bind6, :bind7)", $allTuple);
+		OCICommit($db_conn);
+	}
 
-		function calculatePayment($array, $db_conn) {
-			date_default_timezone_set('UTC');
-			$datediff = strtotime($array['endDate']) - strtotime($array['startDate']);
-			$datediff = floor($datediff/(60*60*24));
-			echo '<h3> Reservation for ';
-			echo $datediff;
-			echo ' days</h3>';
+	// function insertIntoCustomers($array, $util, $db_conn) {
+	// 	$tuple = array (
+	// 		":bind1" => $array['custName'],
+	// 		":bind2" => $array['custAddr'],
+	// 		":bind3" => null,
+	// 		":bind4" => "JOIefE"
+	// 	);
+	// 	$allTuple = array (
+	// 		$tuple
+	// 	);
+	//
+	// 	$util->executeBoundSQL("insert into customers values (:bind1, :bind2, :bind3, :bind4)", $allTuple);
+	// 	OCICommit($db_conn);
+	// }
 
-			$statement = 'SELECT cost_per_day FROM rooms WHERE location_address = :bind1 and room_number = :bind2';
-			$stid = oci_parse($db_conn, $statement);
-			$bind1 = trim(substr($array['loc_room'], 23));
-			$bind2 = trim(substr($array['loc_room'], 7, 3));
-			OCIBindByName($stid, ':bind1', $bind1);
-			OCIBindByName($stid, ':bind2', $bind2);
-			OCIExecute($stid);
+	function calculatePayment($array, $db_conn) {
+		date_default_timezone_set('UTC');
+		$datediff = strtotime($array['endDate']) - strtotime($array['startDate']);
+		$datediff = floor($datediff/(60*60*24));
+		echo '<h3> Reservation for ';
+		echo $datediff;
+		echo ' days</h3>';
 
-			$row = OCI_Fetch_Array($stid, OCI_BOTH);
+		$statement = 'SELECT cost_per_day FROM rooms WHERE location_address = :bind1 and room_number = :bind2';
+		$stid = oci_parse($db_conn, $statement);
+		$bind1 = trim(substr($array['loc_room'], 23));
+		$bind2 = trim(substr($array['loc_room'], 7, 3));
+		OCIBindByName($stid, ':bind1', $bind1);
+		OCIBindByName($stid, ':bind2', $bind2);
+		OCIExecute($stid);
 
-			echo '<h2> Booking Total: ';
-			$amount = $row['COST_PER_DAY'] * $datediff;
-			echo $amount;
-			echo '</h2>';
-			return $amount;
-		}
-		?>
+		$row = OCI_Fetch_Array($stid, OCI_BOTH);
+
+		echo '<h2> Booking Total: ';
+		$amount = $row['COST_PER_DAY'] * $datediff;
+		echo $amount;
+		echo '</h2>';
+		return $amount;
+	}
+	?>
 	</body>
 </html>
