@@ -27,6 +27,10 @@
         	<input type="submit" value="Find Employee" name="findEmployee"></p>		
 	</div>
 	
+
+       	<input type="submit" value="Find Great Customers" name="findCust"></p>	
+	<input type="submit" value="Find Price" name="findExpensiveLoc"></p>
+	
 	</form>
 
 	<?php
@@ -108,8 +112,22 @@
 								OCIBindByName($stid, ':bind5', $bind5);
 								OCIExecute($stid);
 								OCICommit($db_conn);	
-							}
-
+							} else 
+								if(array_key_exists ('findCust', $_POST)){
+									$statement = "SELECT cname FROM customers where NOT EXISTS ((select location_address from location) MINUS (select location_address from reserves where reserves.name = customers.cname)) ";
+											$stid = oci_parse($db_conn, $statement);
+											OCIExecute($stid);
+											$util->printResultTable($stid , ["CNAME"]);
+											OCICommit($db_conn);
+								} else
+									 if (array_key_exists ('findExpensiveLoc' , $_POST)){
+										$statement = "select AVG(cost_per_day), location_address from rooms group by 											location_address HAVING AVG(cost_per_day) = (select MAX(AVG(cost_per_day)) from rooms 											group by location_address)";
+										$stid = oci_parse($db_conn, $statement);
+										OCIExecute($stid);
+										$row = OCI_Fetch_Array($stid, OCI_BOTH);
+										echo "average is : " . $row[0] . " for location: " . $row[1] ;
+										OCICommit($db_conn);
+								}
 
         		OCILogoff($db_conn);
 		}else {

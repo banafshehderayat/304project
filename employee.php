@@ -24,9 +24,6 @@
 	<br>
         <input type="submit" value="View Rooms" name="viewRooms"></p>
 
-        Start Date : <input type="date" name="startDate"><br>
-        End Date : <input type="date" name="endDate"><br>
-        <input type="submit" value="Find Available Rooms" name="findRooms"></p>
 
 	<input type="submit" value="Update Rooms" name="updateRooms"></p>
 
