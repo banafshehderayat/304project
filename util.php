@@ -65,7 +65,7 @@ function printResultTable($result, $cols) { //prints results from a select state
 	echo "<tr>";
 
 	foreach ($cols as &$col) {
-		echo "<th>$col</th>";
+		echo "<th>" . $col . "</th>";
 	}
 	echo "</tr>";
 

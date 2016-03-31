@@ -135,7 +135,7 @@ CREATE TABLE reserves
 	 start_date date not null,
 	 end_date date not null,
 	 primary key (name, address, location_address, room_number),
-	 foreign key (name, address) references customers,
+	 foreign key (name, address) references customers(cname, address),
 	 foreign key (location_address) references location,
 	 foreign key (room_number, location_address) references rooms,
 	 foreign key (transaction_id) references payment);
@@ -255,4 +255,10 @@ values (null , 'Emily Terran' , '111 UBC', 2,
 	'$2y$10$C4/RI35R3Th/E/dTMW6OgeY9sEaCN.qNJZAW151XEPZABk6f68npu');
 
 insert into reserves
-values ('Bennet Abraham', '6223 Bateman St. Berkeley, CA 94705', '123 Main Street', 1, 0736, '13-NOV-16', '15-NOV-16');
+values ('Bennet Abraham', '6223 Bateman St. Berkeley, CA 94705', '123 Main Street', 4, 0736, '01-APR-16', '05-APR-16');
+
+insert into reserves
+values ('Elliot', '010 Robot St', '123 Main Street', 4, 6655, '06-APR-16', '09-APR-16');
+
+insert into reserves
+values ('Elliot', '010 Robot St', '123 Main Street', 2, 0877, '13-APR-16', '15-APR-16');
