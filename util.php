@@ -61,23 +61,31 @@ function executePlainSQL($cmdstr) { //takes a plain (no bound variables) SQL com
 }
 
 function printResultTable($result, $cols) { //prints results from a select statement
-	echo "<table>";
-	echo "<tr>";
+	$row = OCI_Fetch_Array($result, OCI_BOTH);	
+	
+	
+	if (empty($row)){
+		echo '<script type="text/javascript" >' . 'alert("no results found");' . ' </script>';
+	} else {
+		echo "<table>";
+		echo "<tr>";
 
-	foreach ($cols as &$col) {
-		echo "<th>$col</th>";
-	}
-	echo "</tr>";
-
-	while ($row = OCI_Fetch_Array($result, OCI_BOTH)) {
-		// Row indices MUST BE IN CAPS
+		foreach ($cols as &$col) {
+			echo "<th>$col</th>";
+		}
+		echo "</tr>";
+		do {
+			// Row indices MUST BE IN CAPS
 		// echo "<tr><td>" . $row["CNAME"] . "</td><td>" . $row["ADDRESS"] . "</td></tr>"; //or just use "echo $row[0]" 
 		echo "<tr>";
 		foreach ($cols as &$col) {
 			echo "<td>" . $row[$col] . "</td>";
 		}
 		echo "</tr>";
+		}
+		while($row = OCI_Fetch_Array($result, OCI_BOTH));
 	}
+
 	echo "</table>";
 
 }

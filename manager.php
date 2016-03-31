@@ -31,6 +31,7 @@
        	<input type="submit" value="Find Great Customers" name="findCust"></p>	
 	<input type="submit" value="Find Price" name="findExpensiveLoc"></p>
 	
+	
 	</form>
 
 	<?php
@@ -39,8 +40,14 @@
 
 		require_once 'util.php';
 		$util = new Util;
-		$debug = True;
-
+		$debug = False;
+		// User is not logged in; redirect to login page
+		session_save_path("php_sessions");
+        	session_start();
+	 	if (empty($_SESSION['user_is_logged_in']) || !($_SESSION['user_is_logged_in']) || ($_SESSION['user_type'] != 'MANAGER')) {
+	 		echo "<meta http-equiv=\"refresh\" content=\"0; URL='login.php?action=logout'\" />";
+	 		return;
+	 	}
 		$db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
 		if ($db_conn) {
         		if ($debug) {
@@ -128,7 +135,8 @@
 										echo "average is : " . $row[0] . " for location: " . $row[1] ;
 										OCICommit($db_conn);
 								}
-
+			
+			echo '<br> <a href="employee.php"> go to employee page</a>';
         		OCILogoff($db_conn);
 		}else {
         		$err = OCIError();
