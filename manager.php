@@ -1,7 +1,6 @@
 <html>
 	<form method="POST" action="manager.php">
 	<div style="border: 1px solid black;">
-		Employee ID: <input type="text" name="empId">
 		Employee Name: <input type="text" name="empName">
 		Location Address: <select name="empLoc">
 		  		<?php 
@@ -28,8 +27,8 @@
 	</div>
 	
 
-       	<input type="submit" value="Find Great Customers" name="findCust"></p>	
-	<input type="submit" value="Find Price" name="findExpensiveLoc"></p>
+       	Find customers that have booked rooms in all locations: <input type="submit" value="Find Great Customers" name="findCust"></p>	
+	Find the location with the highest average price for rooms: <input type="submit" value="Find Price" name="findExpensiveLoc"></p>
 	
 	
 	</form>
@@ -104,24 +103,24 @@
 							OCICommit($db_conn);
 						} else 
 							if (array_key_exists('addEmployee', $_POST)){
-								$statement = "INSERT into employee (EMPLOYEE_ID, NAME, LOCATION_ADDRESS, MANAGER_ID, PASSWORD)		
-								values (:bind1 , :bind2 , :bind3, :bind4, :bind5)";
+								$statement = "INSERT into employee ( NAME, LOCATION_ADDRESS, MANAGER_ID, PASSWORD)		
+								values ( :bind1 , :bind2, :bind3, :bind4)";
 								$stid = oci_parse($db_conn, $statement);
-								$bind1 = $_POST['empId'];
-                						$bind2 = $_POST['empName'];
-								$bind3 = $_POST['empLoc'];
-								$bind4 = $_POST['manId'];
-								$bind5 = $_POST['pass'];	
+								
+                						$bind1 = $_POST['empName'];
+								$bind2 = $_POST['empLoc'];
+								$bind3 = $_POST['manId'];
+								$bind4 = $_POST['pass'];	
+								
 								OCIBindByName($stid, ':bind1', $bind1);
 								OCIBindByName($stid, ':bind2', $bind2);
 								OCIBindByName($stid, ':bind3', $bind3);
 								OCIBindByName($stid, ':bind4', $bind4);
-								OCIBindByName($stid, ':bind5', $bind5);
 								OCIExecute($stid);
 								OCICommit($db_conn);	
 							} else 
 								if(array_key_exists ('findCust', $_POST)){
-									$statement = "SELECT cname FROM customers where NOT EXISTS ((select location_address from location) MINUS (select location_address from reserves where reserves.name = customers.cname)) ";
+									$statement = "SELECT cname FROM customers where NOT EXISTS ((select location_address from location) MINUS (select location_address from reserves where reserves.name = customers.cname))";
 											$stid = oci_parse($db_conn, $statement);
 											OCIExecute($stid);
 											$util->printResultTable($stid , ["CNAME"]);
