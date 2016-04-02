@@ -181,6 +181,12 @@ insert into payment
 values(6655, 530);
 
 insert into payment
+values(1122, 530);
+
+insert into payment
+values(9900, 530);
+
+insert into payment
 values(null, 40);
 
 insert into cash_payment
@@ -258,7 +264,13 @@ insert into reserves
 values ('Bennet Abraham', '6223 Bateman St. Berkeley, CA 94705', '123 Main Street', 4, 0736, '01-APR-16', '05-APR-16');
 
 insert into reserves
-values ('Elliot', '010 Robot St', '111 UBC', 4, 6655, '06-APR-16', '09-APR-16');
+values ('Elliot', '010 Robot St', '111 UBC', 1, 6655, '06-APR-16', '09-APR-16');
 
 insert into reserves
-values ('Elliot', '010 Robot St', '123 Main Street', 2, 0877, '13-APR-16', '15-APR-16');
+values ('Elliot', '010 Robot St', '111 UBC', 2, 0877, '13-APR-16', '15-APR-16');
+
+insert into reserves
+values ('Elliot', '010 Robot St', '111 UBC', 3, 1122, '18-APR-16', '19-APR-16');
+
+insert into reserves
+values ('Elliot', '010 Robot St', '111 UBC', 4, 9900, '20-APR-16', '23-APR-16');

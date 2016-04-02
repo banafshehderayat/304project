@@ -27,7 +27,24 @@
 	</div>
 	
 
-       	Find customers that have booked rooms in all locations: <input type="submit" value="Find Great Customers" name="findCust"></p>	
+       	Find customers that have booked all rooms in a locations:
+	<select name="custLoc">
+		  		<?php 
+		  			require_once 'util.php';
+		  			$util2 = new Util;
+					$debug = True;
+					if ($debug) {
+					}
+		  			$db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
+					if ($db_conn) {
+						$result = $util2->executePlainSQL("select * from location");
+						$util2->printResultDropdown($result, 'LOCATION_ADDRESS');
+						OCILogoff($db_conn);
+					}
+				?>
+			</select>
+	<input type="submit" value="Find Customer" name="findCust"></p>	
+
 	Find the location with the highest average price for rooms: <input type="submit" value="Find Price" name="findExpensiveLoc"></p>
 	
 	
@@ -120,8 +137,10 @@
 								OCICommit($db_conn);	
 							} else 
 								if(array_key_exists ('findCust', $_POST)){
-									$statement = "SELECT cname FROM customers where NOT EXISTS ((select location_address from location) MINUS (select location_address from reserves where reserves.name = customers.cname))";
-											$stid = oci_parse($db_conn, $statement);
+									$statement = "SELECT cname FROM customers where NOT EXISTS ((select room_number from location Natural JOIN rooms where location_address=:bind1) MINUS (select room_number from reserves where reserves.name = customers.cname and reserves.address = customers.address))";
+											$stid = oci_parse($db_conn, $statement);											
+											$bind1 = $_POST['custLoc'];
+											OCIBindByName($stid, ':bind1', $bind1);
 											OCIExecute($stid);
 											$util->printResultTable($stid , ["CNAME"]);
 											OCICommit($db_conn);
