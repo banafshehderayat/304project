@@ -82,10 +82,10 @@
 					$row = OCI_Fetch_Array($stid);
 					echo '<form name="form1" method="post" action="">';
 					echo "<table>";
-        				echo "<tr><th>employee_id</th><th>name</th><th>location_address</th><th>manager_id</th></tr>";
+        			echo "<tr><th>employee_id</th><th>name</th><th>location_address</th><th>manager_id</th></tr>";
 					echo "<tr><td><input type='text' name='eid' value='" . $row["EMPLOYEE_ID"] . "' readonly></td><td><input type='text' name='name' value='" . $row["NAME"] . "'></td><td><input type='text'name='loc' value='" .$row["LOCATION_ADDRESS"]."'></td><td><input type='text'name='mid' value='" .$row["MANAGER_ID"]."' readonly></td></tr>"; 
 					
-        				echo "</table>";
+        			echo "</table>";
 					echo "<br>";
 					echo "<input type='submit' value='update' name='update'>";
 					echo "<input type='submit' value='delete' name='delete'>";

@@ -13,7 +13,7 @@
 					$debug = False;
 					if ($debug) {
 					}
-		  			$db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
+                    $db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
 					if ($db_conn) {
 						$result = $util2->executePlainSQL("SELECT 'Room #: '||ROOM_NUMBER||' at location: '||LOCATION_ADDRESS CONCATENATION FROM rooms order by location_address, room_number");
 						echo "<select name=\"loc_room\" required>";
@@ -59,11 +59,11 @@
 		error_reporting(-1);
 		ini_set('display_errors',1);
 
+        $db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
 		require_once 'util.php';
 		$util = new Util;
-		$debug = True;
+		$debug = False;
 
-		$db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
 		if ($db_conn) {
 
 			if ($debug) {
@@ -78,17 +78,7 @@
 				$amount = calculatePayment($_POST, $db_conn);
 
 				// verify no overlapping reservations
-				$statement = 'SELECT * FROM reserves WHERE (location_address = :bind1 and room_number = :bind2) and ((start_date between :bind3 and :bind4) or (end_date between :bind3 and :bind4) or (:bind3 between start_date and end_date) or (:bind4 between start_date and end_date))';
-		        $stid = oci_parse($db_conn, $statement);
-		        $bind1 = $_POST['loc'];
-		        $bind2 = $_POST['room'];
-				$bind3 = $_POST['startDate'];
-		        $bind4 = $_POST['endDate'];
-		        OCIBindByName($stid, ':bind1', $bind1);
-		        OCIBindByName($stid, ':bind2', $bind2);
-				OCIBindByName($stid, ':bind3', $bind3);
-		        OCIBindByName($stid, ':bind4', $bind4);
-		        OCIExecute($stid);
+                $stid = findExistingReservation($_POST, $db_conn);
 
 				// check if room booked
 				if (oci_fetch_array($stid, OCI_BOTH) != false) {
@@ -104,7 +94,7 @@
 			        $bind2 = $_POST['custAddr'];
 			        OCIBindByName($stid, ':bind1', $bind1);
 			        OCIBindByName($stid, ':bind2', $bind2);
-			        OCIExecute($stid);
+			        OCIExecute($stid, OCI_DEFAULT);
 
 			        // if so, insert all values into reserves.
 			        if (oci_fetch_array($stid, OCI_BOTH) != false) {
@@ -118,7 +108,16 @@
 						}
 						
 						insertIntoReserves($_POST, $util, $db_conn);
-						echo "<h2>Reservation added!</h2>";
+                        
+                        //Print Reservation Id
+                        $stid = findExistingReservation($_POST, $db_conn);
+                        $row = oci_fetch_array($stid, OCI_BOTH);
+                         
+                        if ($row != False) {
+    						echo "<h2>Reservation added! Your Reservation ID is: ";
+                            echo $row['RESERVATION_ID'];
+                            echo ". Make sure you write it down!</h2>";
+                        }
 					}
 					else // otherwise, advise user to register
 					{
@@ -212,19 +211,20 @@
 
 		function insertIntoReserves($array, $util, $db_conn) {
 			$tuple = array (
-					":bind1" => $array['custName'],
-					":bind2" => $array['custAddr'],
-					":bind3" => $array['loc'],
-					":bind4" => $array['room'],
-					":bind5" => null,
-					":bind6" => $array['startDate'],
-					":bind7" => $array['endDate']
+                    ":bind1" => null,
+					":bind2" => $array['custName'],
+					":bind3" => $array['custAddr'],
+					":bind4" => $array['loc'],
+					":bind5" => $array['room'],
+					":bind6" => null,
+					":bind7" => $array['startDate'],
+					":bind8" => $array['endDate']
 				);
 			$allTuple = array (
 				$tuple
 			);
 
-			$util->executeBoundSQL("insert into reserves values (:bind1, :bind2, :bind3, :bind4, :bind5, :bind6, :bind7)", $allTuple);
+			$util->executeBoundSQL("insert into reserves values (:bind1, :bind2, :bind3, :bind4, :bind5, :bind6, :bind7, :bind8)", $allTuple);
 			OCICommit($db_conn);
 		}
 
@@ -267,6 +267,22 @@
 			echo ' for $';
 			echo $row['COST_PER_DAY'];
 			echo ' per day</h3>';
+		}
+        
+        function findExistingReservation($array, $db_conn) {
+            $statement = 'SELECT * FROM reserves WHERE (location_address = :bind1 and room_number = :bind2) and ((start_date between :bind3 and :bind4) or (end_date between :bind3 and :bind4) or (:bind3 between start_date and end_date) or (:bind4 between start_date and end_date))';
+            $stid = oci_parse($db_conn, $statement);
+            $bind1 = $array['loc'];
+            $bind2 = $array['room'];
+            $bind3 = $array['startDate'];
+            $bind4 = $array['endDate'];
+            OCIBindByName($stid, ':bind1', $bind1);
+            OCIBindByName($stid, ':bind2', $bind2);
+            OCIBindByName($stid, ':bind3', $bind3);
+            OCIBindByName($stid, ':bind4', $bind4);
+            OCIExecute($stid);
+            
+            return $stid;
 		}
 		?>
 	</body>

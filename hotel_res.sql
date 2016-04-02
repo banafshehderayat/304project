@@ -1,6 +1,7 @@
 drop SEQUENCE e_seq;
 drop table employee;
 drop SEQUENCE pay_seq;
+drop SEQUENCE res_seq;
 drop table reserves;
 drop table cash_payment;
 drop table card_payment;
@@ -127,28 +128,41 @@ CREATE TABLE employee
 grant select on employee to public;
 
 CREATE TABLE reserves
-	(name varchar(40) not null,
+	(reservation_id number,
+     name varchar(40) not null,
 	 address varchar(40) not null,
 	 location_address varchar(40) not null,
 	 room_number int not null,
 	 transaction_id int,
 	 start_date date not null,
 	 end_date date not null,
-	 primary key (name, address, location_address, room_number),
+	 primary key (reservation_id),
 	 foreign key (name, address) references customers(cname, address),
 	 foreign key (location_address) references location,
 	 foreign key (room_number, location_address) references rooms,
-	 foreign key (transaction_id) references payment);
+	 foreign key (transaction_id) references payment ON DELETE CASCADE);
 
-	CREATE OR REPLACE TRIGGER res_bir
+	CREATE OR REPLACE TRIGGER res_tx_bir
 	BEFORE INSERT ON reserves
 	FOR EACH ROW
 	WHEN (new.transaction_id IS NULL)
 	BEGIN
   		SELECT pay_seq.CURRVAL
-  		INTO   :new.transaction_id
+  		INTO   :new.transaction_id 
   		FROM   dual;
 	END;
+	/
+    
+    CREATE SEQUENCE res_seq;
+    CREATE OR REPLACE TRIGGER res_id_bir
+	BEFORE INSERT ON reserves
+	FOR EACH ROW
+    WHEN (new.reservation_id IS NULL)
+    BEGIN
+        SELECT res_seq.NEXTVAL
+        INTO :new.reservation_id
+        FROM dual;
+    END;
 	/
 
 grant select on reserves to public;
@@ -264,18 +278,16 @@ values (null , 'Emily Terran' , '111 UBC', 2,
 	'$2y$10$C4/RI35R3Th/E/dTMW6OgeY9sEaCN.qNJZAW151XEPZABk6f68npu');
 
 insert into reserves
-values ('Bennet Abraham', '6223 Bateman St. Berkeley, CA 94705', '123 Main Street', 4, 0736, '01-APR-16', '05-APR-16');
+values (null, 'Bennet Abraham', '6223 Bateman St. Berkeley, CA 94705', '123 Main Street', 4, 0736, '01-APR-16', '05-APR-16');
 
 insert into reserves
-
-values ('Elliot', '010 Robot St', '111 UBC', 1, 6655, '06-APR-16', '09-APR-16');
-
-insert into reserves
-values ('Elliot', '010 Robot St', '111 UBC', 2, 0877, '13-APR-16', '15-APR-16');
+values (null, 'Elliot', '010 Robot St', '111 UBC', 1, 6655, '06-APR-16', '09-APR-16');
 
 insert into reserves
-values ('Elliot', '010 Robot St', '111 UBC', 3, 1122, '18-APR-16', '19-APR-16');
+values (null, 'Elliot', '010 Robot St', '111 UBC', 2, 0877, '13-APR-16', '15-APR-16');
 
 insert into reserves
-values ('Elliot', '010 Robot St', '111 UBC', 4, 9900, '20-APR-16', '23-APR-16');
+values (null, 'Elliot', '010 Robot St', '111 UBC', 3, 1122, '18-APR-16', '19-APR-16');
 
+insert into reserves
+values (null, 'Elliot', '010 Robot St', '111 UBC', 4, 9900, '20-APR-16', '23-APR-16');
