@@ -226,6 +226,9 @@ insert into rooms
 values (5, '123 Main Street', 'Single', 1, 50);
 
 insert into rooms
+values (6, '111 UBC', 'Single', 1, 50);
+
+insert into rooms
 values (1, '111 UBC', 'King Room', 4, 150);
 
 insert into rooms
