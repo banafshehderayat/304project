@@ -112,7 +112,7 @@
 
             			echo "<tr><th>Employee ID</th><th>Name</th><th>Location Address</th><th>Manager Name</th></tr>";
     					echo "<tr><td><input type='text' name='eid' value='" . $employee["EMPLOYEE_ID"] . "' readonly></td>
-    						      <td><input type='text' name='name' value='" . $employee["NAME"] . "'></td>
+    						      <td><input type='text' name='name' value='" . $employee["NAME"] . "' required></td>
     						      <td><input type='text'name='loc' value='" .$employee["LOCATION_ADDRESS"]."'></td>
     						      <td><input type='text'name='manName' value='" .$manager["NAME"]."' readonly></td>
     						  </tr>"; 
