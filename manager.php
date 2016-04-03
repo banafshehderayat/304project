@@ -26,7 +26,7 @@
         	<input type="submit" value="Find Employee" name="findEmployee"></p>		
 	</div>
 	
-
+		<br>
        	Find customers that have booked all rooms in a locations:
 	<select name="custLoc">
 		  		<?php 
@@ -190,7 +190,7 @@
 										OCICommit($db_conn);
 								}
 			
-			echo '<br> <a href="employee.php"> go to employee page</a>';
+			echo '<br> <a href="employee.php"> Go to Employee Page</a>';
         		OCILogoff($db_conn);
 		} else {
         		$err = OCIError();
