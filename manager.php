@@ -7,8 +7,6 @@
 		  			require_once 'util.php';
 		  			$util2 = new Util;
 					$debug = True;
-					if ($debug) {
-					}
 		  			$db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
 					if ($db_conn) {
 						$result = $util2->executePlainSQL("select * from location");
@@ -18,12 +16,24 @@
 				?>
 			</select>
 		Manager ID: <input type="text" name="manId">
-		Password: <input type="text" name="pass">
+		Password: <input type="text" name="pass" >
         	<input type="submit" value="Add Employee" name="addEmployee"></p>		
 	</div>
 	<div style="border: 1px solid black;">
-		Employee ID: <input type="text" name="eID">
-        	<input type="submit" value="Find Employee" name="findEmployee"></p>		
+		Employee ID:<select name="eID">
+		  		<?php 
+		  			require_once 'util.php';
+		  			$util2 = new Util;
+					$debug = True;
+		  			$db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
+					if ($db_conn) {
+						$result = $util2->executePlainSQL("select employee_id from employee");
+						$util2->printResultDropdown($result, 'EMPLOYEE_ID');
+						OCILogoff($db_conn);
+					}
+				?>
+			</select>
+        	<input type="submit" value="Find Employee" name="findEmployee" ></p>		
 	</div>
 	
 
@@ -54,7 +64,7 @@
 	</form>
 
 	<?php
-		error_reporting(-1);
+		error_reporting(E_ERROR);
 		ini_set('display_errors',1);
 
 		require_once 'util.php';
@@ -77,7 +87,12 @@
                 			$stid = oci_parse($db_conn, $statement);
                 			$bind = $_POST['eID'];
                				OCIBindByName($stid, ':bind', $bind);
-                			OCIExecute($stid);
+                			$r = OCIExecute($stid);
+					if ($r == FALSE){
+
+								echo '<script type="text/javascript">'. 'alert("The employee ID you have entered is incorrect.")</script>';
+							} else {
+					
 					//$util->printResultTable($stid , ["EMPLOYEE_ID", "NAME", "LOCATION_ADDRESS", "MANAGER_ID"]);
 					$row = OCI_Fetch_Array($stid);
 					echo '<form name="form1" method="post" action="">';
@@ -91,21 +106,29 @@
 					echo "<input type='submit' value='delete' name='delete'>";
 					echo "</form>";
                 			OCICommit($db_conn);
+					}
 				} else  
 					if (array_key_exists('update', $_POST)){
 						
 							$statement = "UPDATE employee SET NAME = :bind1 , LOCATION_ADDRESS = :bind2 
 							WHERE EMPLOYEE_ID = :bind3";
 							$stid = oci_parse($db_conn, $statement);
+							
 							$bind1 = $_POST['name'];
                 					$bind2 = $_POST['loc'];
 							$bind3 = $_POST['eid'];
                 					OCIBindByName($stid, ':bind1', $bind1);
                 					OCIBindByName($stid, ':bind2', $bind2);
 							OCIBindByName($stid, ':bind3', $bind3);
-               						OCIExecute($stid);
-							echo "Table Updated: " . "employee: " . $bind1 . " has been updated!";
-                					OCICommit($db_conn);
+               						$r = OCIExecute($stid);
+							if ($r == FALSE){
+
+								echo '<script type="text/javascript">'. 'alert("The employee information you have entered is incorrect.")</script>';
+							} else{
+								echo "Table Updated: " . "employee: " . $bind1 . " has been updated!";
+                						OCICommit($db_conn);
+							}
+							
 										
 					} else 
 						if (array_key_exists('delete', $_POST)) {
@@ -136,8 +159,12 @@
 								OCIBindByName($stid, ':bind2', $bind2);
 								OCIBindByName($stid, ':bind3', $bind3);
 								OCIBindByName($stid, ':bind4', $bind4);
-								OCIExecute($stid);
-								OCICommit($db_conn);	
+								$r = OCIExecute($stid);
+								if ($r == FALSE){
+									echo '<script type="text/javascript">'. 'alert("The employee information you have entered is invalid.")</script>';
+								} else{ OCICommit($db_conn);
+									}
+									
 							} else 
 								if(array_key_exists ('findCust', $_POST)){
 									$statement = "SELECT cname FROM customers where NOT EXISTS ((select room_number from location Natural JOIN rooms where location_address=:bind1) MINUS (select room_number from reserves where reserves.name = customers.cname and reserves.address = customers.address))";

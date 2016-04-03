@@ -5,7 +5,7 @@
 	</form>
 
 	<?php
-		error_reporting(-1);
+		error_reporting(E_ERROR);
 		ini_set('display_errors',1);
 
 		require_once 'util.php';
@@ -49,18 +49,20 @@
 									$statement = "UPDATE rooms SET TYPE = :bind1 , MAX_OCCUPANCY = :bind2 , COST_PER_DAY = :bind3 WHERE ROOM_NUMBER = :bind4 and LOCATION_ADDRESS = :bind5";
 									$stid = oci_parse($db_conn, $statement);
 									$bind1 = $_POST['type'][$index];
-		              $bind2 = $_POST['max'][$index];
+		              						$bind2 = $_POST['max'][$index];
 									$bind3 = $_POST['cost'][$index];
 									$bind4 = $_POST['num'][$index];
 									$bind5 = $_POST['loc'][$index];
-		              OCIBindByName($stid, ':bind1', $bind1);
-		              OCIBindByName($stid, ':bind2', $bind2);
+		              						OCIBindByName($stid, ':bind1', $bind1);
+		              						OCIBindByName($stid, ':bind2', $bind2);
 									OCIBindByName($stid, ':bind3', $bind3);
 									OCIBindByName($stid, ':bind4', $bind4);
 									OCIBindByName($stid, ':bind5', $bind5);
-		              OCIExecute($stid);
-									//$util->printResultRooms($stid);
-		                					//OCICommit($db_conn);
+		              						$r = OCIExecute($stid);
+									if ($r == FALSE){
+									echo '<script type="text/javascript">'. 'alert("The room information you have entered is invalid.")</script>';
+									} else{ OCICommit($db_conn);
+										}
 								}
 							}
 
