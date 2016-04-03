@@ -45,7 +45,10 @@
 			</select>
 	<input type="submit" value="Find Customer" name="findCust"></p>	
 
-	Find the location with the highest average price for rooms: <input type="submit" value="Find Price" name="findExpensiveLoc"></p>
+	Find the location with the highest/lowest average price for rooms: 
+	 <input type="radio" name="order" value="MIN"> Min
+	 <input type="radio" name="order" value="MAX"> Max
+	<input type="submit" value="Find Price" name="findExpensiveLoc"></p>
 	
 	
 	</form>
@@ -146,9 +149,17 @@
 											OCICommit($db_conn);
 								} else
 									 if (array_key_exists ('findExpensiveLoc' , $_POST)){
-										$statement = "select AVG(cost_per_day), location_address from rooms group by 											location_address HAVING AVG(cost_per_day) = (select MAX(AVG(cost_per_day)) from rooms 											group by location_address)";
+										$bind = $_POST['order'];
+										if ($bind == 'MAX'){
+											$statement = "select AVG(cost_per_day), location_address from rooms group by 											location_address HAVING AVG(cost_per_day) = (select MAX(AVG(cost_per_day)) from rooms 											group by location_address)";									
+										} else {
+											$statement = "select AVG(cost_per_day), location_address from rooms group by 											location_address HAVING AVG(cost_per_day) = (select MIN(AVG(cost_per_day)) from rooms 											group by location_address)";
+										}
+										
 										$stid = oci_parse($db_conn, $statement);
+										
 										OCIExecute($stid);
+										
 										$row = OCI_Fetch_Array($stid, OCI_BOTH);
 										echo "average is : " . $row[0] . " for location: " . $row[1] ;
 										OCICommit($db_conn);
