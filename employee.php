@@ -24,11 +24,8 @@
 	<br>
         <input type="submit" value="View Rooms" name="viewRooms"></p>
 
-        Start Date : <input type="date" name="startDate"><br>
-        End Date : <input type="date" name="endDate"><br>
-        <input type="submit" value="Find Available Rooms" name="findRooms"></p>
 
-	<input type="submit" value="Update Rooms" name="updateRooms"></p>
+	
 
 
 </form>
@@ -40,8 +37,14 @@ ini_set('display_errors',1);
 
 require_once 'util.php';
 $util = new Util;
-$debug = True;
-
+$debug = False;
+// User is not logged in; redirect to login page
+		session_save_path("php_sessions");
+        	session_start();
+	 	if (empty($_SESSION['user_is_logged_in']) || !($_SESSION['user_is_logged_in']) || ($_SESSION['user_type'] == 'CUSTOMER')) {
+	 		echo "<meta http-equiv=\"refresh\" content=\"0; URL='login.php?action=logout'\" />";
+	 		return;
+	 	}
 $db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
 if ($db_conn) {
         if ($debug) {
@@ -58,25 +61,35 @@ if ($db_conn) {
                	OCIExecute($stid);
                 $util->printResultTable($stid, ["CNAME", "ADDRESS", "CID"]);
                 OCICommit($db_conn);
+
                 if ($debug) {
                         echo "Customer found\n";
                 }
         } else
-          		if (array_key_exists('viewRooms', $_POST)) {
+          		
+		if (array_key_exists('viewRooms', $_POST)) {
 
           			$statement = "SELECT * FROM rooms where location_address = :bind";
                           	$stid = oci_parse($db_conn, $statement);
                           	$bind = $_POST['loc'];
                           	OCIBindByName($stid, ':bind', $bind);
                           	OCIExecute($stid);
-          			echo($stid);
                           	$util->printResultTable($stid , ["ROOM_NUMBER", "LOCATION_ADDRESS", "TYPE", "MAX_OCCUPANCY", "COST_PER_DAY"]);
                           	OCICommit($db_conn);
-        } else
-        			if (array_key_exists('updateRooms', $_POST)){
-        				header('Location: http://www.ugrad.cs.ubc.ca/~j7l8/updateRooms.php');
-        			}
+        } 
+	echo '<a href="updateRooms.php"> Update Rooms</a>';
+
+
+	if ($_SESSION['user_type'] == 'MANAGER'){
+		echo '<br>';
+		echo '<a href="manager.php">go back!</a>';	
+	}
+
+
         OCILogoff($db_conn);
+
+
+	
       } else {
         $err = OCIError();
         echo "Oracle Connect Error" . $err['message'];
