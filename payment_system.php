@@ -27,7 +27,8 @@
 			Customer Name: <input type="text" name="custName" required> <br>
 			Customer Address: <input type="text" name="custAddr" required> <br>
       		
-      		<input type="submit" value="Check Price" name="checkCost"></br>
+      		<input type="submit" value="Check Price" name="checkCost">
+      		<input type="submit" value="Show cheapest room!" name="lowco"></p>
 
 			Payment type: 	
 				<select id="paymentType" name="paymentType" required>
@@ -37,7 +38,6 @@
 				</select> <br>
 			Card Number: <input type="text" id="cardNo" name="cardNo" required> <br>
 			<input type="submit" value="Save Reservation" name="saveRes">
-			<input type="submit" value="Pick cheapest room!" name="lowco"></p>
 		</form>
 
 		<script type="text/javascript">
@@ -61,7 +61,7 @@
 
 		require_once 'util.php';
 		$util = new Util;
-		$debug = True;
+		$debug = False;
 
 		$db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
 		if ($db_conn) {
@@ -75,10 +75,9 @@
 				$_POST['room'] = trim(substr($_POST['loc_room'], 7, 3));
 				$_POST['loc'] = trim(substr($_POST['loc_room'], 23));
 
-				$amount = calculatePayment($_POST, $db_conn);
-
 				// verify no overlapping reservations
 				$statement = 'SELECT * FROM reserves WHERE (location_address = :bind1 and room_number = :bind2) and ((start_date between :bind3 and :bind4) or (end_date between :bind3 and :bind4) or (:bind3 between start_date and end_date) or (:bind4 between start_date and end_date))';
+
 		        $stid = oci_parse($db_conn, $statement);
 		        $bind1 = $_POST['loc'];
 		        $bind2 = $_POST['room'];
@@ -92,8 +91,7 @@
 
 				// check if room booked
 				if (oci_fetch_array($stid, OCI_BOTH) != false) {
-					echo '<h2>Room already booked! Try another date.</h2>';
-					echo '<br>';
+					echo '<script type="text/javascript" >alert("This room is already booked! Try another date."); </script>';
 				}
 				else // otherwise proceed
 				{ 
@@ -107,6 +105,7 @@
 			        OCIExecute($stid);
 
 			        // if so, insert all values into reserves.
+			        $amount = calculatePayment($_POST, $db_conn);
 			        if (oci_fetch_array($stid, OCI_BOTH) != false) {
 						//cash payment
 						if ($_POST['paymentType'] == "Cash") {
@@ -118,7 +117,8 @@
 						}
 						
 						insertIntoReserves($_POST, $util, $db_conn);
-						echo "<h2>Reservation added!</h2>";
+
+						echo '<script type="text/javascript" >alert("Reservation added!"); </script>';
 					}
 					else // otherwise, advise user to register
 					{
@@ -260,13 +260,11 @@
 
 			$row = OCI_Fetch_Array($stid, OCI_BOTH);
 
-			echo '<h3>The cheapest available room is room number: ';
-			echo $row['ROOM_NUMBER'];
-			echo ' at location: ';
-			echo $row['LOCATION_ADDRESS'];
-			echo ' for $';
-			echo $row['COST_PER_DAY'];
-			echo ' per day</h3>';
+			echo '<script type="text/javascript" >alert(
+				"The cheapest available room is room number ' . 
+				$row['ROOM_NUMBER'] . ' at location ' . 
+				$row['LOCATION_ADDRESS'] . ' for $' . 
+				$row['COST_PER_DAY'] . ' per day"); </script>';
 		}
 		?>
 	</body>
