@@ -62,7 +62,7 @@ class MyAccount {
      * @return bool Database creation success status, false by default
      */
 	 private function createDBConnection() {
-	 	$this->db_connection = OCILogon("ora_b9y8", "a38319125", "ug");
+	 	$this->db_connection = OCILogon("ora_j7l8", "a31501125", "ug");
         if ($this->db_connection) {
             return true;
         }
@@ -86,6 +86,10 @@ class MyAccount {
         elseif (isset($_POST["edit"]) && $_POST["edit"] == "Update") { 
         	$this->doUpdateReservation();
         	$this->doEditReservation();
+        }
+        elseif (isset($_POST["delete"]) && $_POST["delete"] == "Delete") { 
+        	$this->doDeleteReservation();
+        	$this->showAccountSummary();
         }
         else {
         	$this->showAccountSummary();
@@ -114,6 +118,7 @@ class MyAccount {
      	$end_date = htmlentities($_POST['end'], ENT_QUOTES);
      	$location = htmlentities($_POST['location'], ENT_QUOTES);
      	$room_number = htmlentities($_POST['room'], ENT_QUOTES);
+        $reservation = htmlentities($_POST['reservation_id'], ENT_QUOTES);
 
      	$sql = 'SELECT type, max_occupancy
      			FROM rooms
@@ -147,9 +152,12 @@ class MyAccount {
      		  <input type='hidden' name='start_old' value='" . $start_date . "'/>
      		  <input type='hidden' name='end_old' value='" . $end_date ."'/>
      		  <input type='hidden' name='transaction' value='" . $_POST['transaction'] ."'/>
+              <input type='hidden' value='" . $reservation . "' name='reservation_id' />
      		  </tr></table>"; 
 
-     	echo "<input type='submit' value='Update' name='edit'></form>";
+     	echo "<input type='submit' value='Update' name='edit'>";
+        echo "<input type='submit' value='Delete' name='delete'></form>";
+        
 
 
      	echo '<br><br><a href="' . $_SERVER['SCRIPT_NAME'] . '">Back to Account Summary</a>';
@@ -207,6 +215,19 @@ class MyAccount {
      	}
      }
 
+     private function doDeleteReservation() {
+       $transaction_id = htmlentities($_POST['transaction'], ENT_QUOTES);
+       // Cascade delete reservation associated with transaction_id
+       $delete = "DELETE FROM PAYMENT 
+       WHERE transaction_id = :transaction_id";
+
+       $upStmt = oci_parse($this->db_connection, $delete);
+       ocibindbyname($upStmt, ':transaction_id', $transaction_id);
+
+       OCIExecute($upStmt, OCI_DEFAULT);
+       OCICommit($this->db_connection);
+     }
+
      /**
       * @return true if there are no overlapping reservations for the
       * 			 given room and dates
@@ -260,7 +281,7 @@ class MyAccount {
 	  * Prints reservation table with an extra 'edit' column at the end.
 	  */
 	 function printReservations($result) {
-	 	$columns = ['Room Number', 'Location', 'Start Date<br> DD-MM-YY', 'End Date<br>DD-MM-YY', 'Amount Paid', '-'];
+	 	$columns = ['Room Number', 'Location', 'Start Date<br> DD-MM-YY', 'End Date<br>DD-MM-YY', 'Amount Paid', 'TID'];
 
 	 	echo '<table><tr>';
 
@@ -277,9 +298,11 @@ class MyAccount {
 	 		echo '<td>' . $row['START_DATE'] . '</td>';
 	 		echo '<td>' . $row['END_DATE'] . '</td>';
 	 		echo '<td>' . $row['AMOUNT'] . '</td>';
+            echo '<td>' . $row['TRANSACTION_ID'] . '</td>';
 
 	 		echo '<td><form method="POST" action="' . $_SERVER['SCRIPT_NAME'] . '?action=edit">
 	 		<input type="hidden" name="location" value="' . $row['LOCATION']. '"/>
+            <input type="hidden" name="reservation_id" value="' . $row['RESERVATION_ID'] .'"/>
 	 		<input type="hidden" name="room" value="' . $row['ROOM_NUMBER'] .'"/>
 	 		<input type="hidden" name="start" value="' . $row['START_DATE'] .'"/>
 	 		<input type="hidden" name="end" value="' . $row['END_DATE'] .'"/>
@@ -298,7 +321,8 @@ class MyAccount {
 	 private function getReservationDetails() {
 	 	$sql = 'SELECT reserves.room_number, reserves.location_address AS LOCATION, 
 	 				   reserves.start_date, reserves.end_date, payment.amount, customers.cid,
-	 				   reserves.transaction_id
+	 				   reserves.transaction_id,
+                       reserves.reservation_id
 	 			FROM customers, reserves, payment
 	 			WHERE customers.cname = reserves.name AND 
 	 				  customers.address = reserves.address AND

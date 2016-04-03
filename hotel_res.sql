@@ -54,7 +54,7 @@ grant select on payment to public;
 CREATE TABLE cash_payment
 	(transaction_id number,
 	 primary key (transaction_id),
-	 foreign key (transaction_id) references payment(transaction_id));
+	 foreign key (transaction_id) references payment(transaction_id) ON DELETE CASCADE);
 
 	CREATE OR REPLACE TRIGGER cashpay_bir
 	BEFORE INSERT ON cash_payment
@@ -73,7 +73,7 @@ CREATE TABLE card_payment
 	(transaction_id number,
 	 card_number char(16),
 	 primary key (transaction_id),
-	 foreign key (transaction_id) references payment(transaction_id));
+	 foreign key (transaction_id) references payment(transaction_id) ON DELETE CASCADE);
 
 	CREATE OR REPLACE TRIGGER cardpay_bir
 	BEFORE INSERT ON card_payment
