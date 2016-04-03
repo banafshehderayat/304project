@@ -68,7 +68,7 @@ function printResultTable($result, $cols) { //prints results from a select state
 	if (empty($row)){
 		echo '<script type="text/javascript" >' . 'alert("no results found");' . ' </script>';
 	} else {
-		echo "<table>";
+		echo "<table class='table table-striped'>";
 		echo "<tr>";
 
 		foreach ($cols as &$col) {

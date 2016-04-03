@@ -1,41 +1,61 @@
 
 <html>
 	<head>
-		<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.12.0.min.js"></script>
-		<p>Rent! Rent Now! A room with us gets a room for you, because you exchanged money via our payment system for the service we provide, which, you guessed it, is a room.</p>
+		<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+		
 	</head>
 	<body>
+
+	<nav class="navbar navbar-default">
+<div class="navbar-header">
+      <h2 class="navbar-brand">Payment System</h2>
+</div>
+</nav>
+	<div class="container">
 		<form method="POST" action="payment_system.php">
-			Location & Room:
+			<div class="form-group">
+			    <label> Location Address <label>
 				<?php
 		  			require_once 'util.php';
 		  			$util2 = new Util;
-					$debug = False;
-					if ($debug) {
-					}
+					
                     $db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
 					if ($db_conn) {
 						$result = $util2->executePlainSQL("SELECT 'Room #: '||ROOM_NUMBER||' at location: '||LOCATION_ADDRESS CONCATENATION FROM rooms order by location_address, room_number");
-						echo "<select name=\"loc_room\" required>";
+						echo "<select class='form-control'  name=\"loc_room\" required>";
 						$util2->printResultDropdown($result, 'CONCATENATION');
 						OCILogoff($db_conn);
 						echo "</select><br>";
 					}
 				?>
-			Start Date : <input type="date" name="startDate" required><br>
-      		End Date : <input type="date" name="endDate" required><br>
-      		
-      		<input type="submit" value="Check Price" name="checkCost">
-      		<input type="submit" value="Show cheapest room!" name="lowco"></p>
-
-			Payment type: 	
-				<select id="paymentType" name="paymentType" required>
+			</div>
+			<div class="form-group">
+    			<label> Start Date<label>
+    			<input type="date" class="form-control" name="startDate" required>
+			</div>
+			<br>
+      		<div class="form-group">
+    			<label> End Date<label>
+    			 <input type="date" class="form-control" name="endDate" required>
+			</div>
+			<br>
+            
+      		<input type="submit" class="form-control" value="Check Price" name="checkCost">
+      		<input type="submit" class="form-control" value="Show cheapest room!" name="lowco"></p>
+			<div class="form-group">
+			<label> Payment type<label>
+				
+				<select class="form-control" id="paymentType" name="paymentType" required>
 					<option value="Cash">Cash</option>
 					<option value="Mastercard">Mastercard</option>
 					<option value="Visa">Visa</option>
-				</select> <br>
-			Card Number: <input type="text" id="cardNo" name="cardNo" required> <br>
-			<input type="submit" value="Save Reservation" name="saveRes">
+				</select> </div><br>
+			<div class="form-group">
+			<label> Card Number<label>
+			 <input type="text" class="form-control" id="cardNo" name="cardNo" required> </div><br>
+			<input type="submit" class="form-control" value="Save Reservation" name="saveRes">
 		</form>
 
 		<script type="text/javascript">
@@ -302,5 +322,8 @@
            echo "<meta http-equiv=\"refresh\" content=\"0; URL='login.php?action=logout'\" />";
         }
 		?>
+
+	</div>
 	</body>
+	
 </html>

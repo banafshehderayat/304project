@@ -1,4 +1,13 @@
 <html>
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<body>
+<nav class="navbar navbar-default">
+<div class="navbar-header">
+      <h2 class="navbar-brand">Update Rooms</h2>
+</div>
+</nav>
 	<?php
 		error_reporting(E_ERROR);
 		ini_set('display_errors',1);
@@ -44,7 +53,7 @@
 			$stid = oci_parse($db_conn, $statement);
 			OCIExecute($stid);
 			echo '<form name="form1" method="post" action="updateRooms.php">';
-			echo "<table>";
+			echo "<table class='table table-striped'>";
 			echo "<tr><th>Room Number</th>
 				  <th>Location Address</th>
 				  <th>Type</th>
@@ -66,7 +75,7 @@
 
 			echo "</table>";
 			echo "<br>";
-			echo "<input type='submit' value='Update' name='update'>";
+			echo "<input type='submit' value='Update' name='update' class='btn btn-default'>";
 			echo "</form>";
 			OCICommit($db_conn);
 
@@ -78,4 +87,5 @@
 		}
 
 		?>
+</body>
 		</html>

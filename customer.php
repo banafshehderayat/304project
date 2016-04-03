@@ -1,3 +1,13 @@
+<html>
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<body>
+<nav class="navbar navbar-default">
+<div class="navbar-header">
+      <h2 class="navbar-brand">Customer</h2>
+</div>
+</nav>
 <?php
 error_reporting(-1);
 ini_set('display_errors',1);
@@ -43,7 +53,7 @@ class MyAccount {
         }
 
         // User is not logged in; redirect to login page
-	 	if (empty($_SESSION['user_is_logged_in']) || !($_SESSION['user_is_logged_in'])) {
+	 	if (empty($_SESSION['user_is_logged_in']) || !($_SESSION['user_is_logged_in'] || $_SESSION['user_type'] != 'CUSTOMER')) {
 	 		$this->notLoggedIn();
 	 		return false;
 	 	}
@@ -134,7 +144,7 @@ class MyAccount {
         $row = OCI_Fetch_Array($statement);
 
      	echo '<form method="POST" action="' . $_SERVER['SCRIPT_NAME'] . '?action=edit">';
-     	echo "<table><tr>
+     	echo "<table class='table table-striped'><tr>
      		  <th>Location Address</th>
      		  <th>Room Number</th>
      		  <th>Room Type</th>
@@ -155,10 +165,8 @@ class MyAccount {
               <input type='hidden' value='" . $reservation . "' name='reservation_id' />
      		  </tr></table>"; 
 
-     	echo "<input type='submit' value='Update' name='edit'>";
-        echo "<input type='submit' value='Delete' name='delete'></form>";
-        
-
+     	echo "<input type='submit' value='Update' name='edit' class='btn btn-default'>";
+        echo "<input type='submit' value='Delete' name='delete' class='btn btn-default'></form>";
 
      	echo '<br><br><a href="' . $_SERVER['SCRIPT_NAME'] . '">Back to Account Summary</a>';
      }
@@ -281,7 +289,7 @@ class MyAccount {
 	 function printReservations($result) {
 	 	$columns = ['Room Number', 'Location', 'Start Date<br> DD-MM-YY', 'End Date<br>DD-MM-YY', 'Amount Paid', 'TID'];
 
-	 	echo '<table><tr>';
+	 	echo '<table class="table table-striped"><tr>';
 
 	 	foreach ($columns as &$col) {
 	 		echo '<th>' . $col . '</th>';
@@ -305,7 +313,7 @@ class MyAccount {
 	 		<input type="hidden" name="start" value="' . $row['START_DATE'] .'"/>
 	 		<input type="hidden" name="end" value="' . $row['END_DATE'] .'"/>
 	 		<input type="hidden" name="transaction" value="' . $row['TRANSACTION_ID'] .'"/>
-	 		<input type="submit" name="edit" value="Edit" />
+	 		<input type="submit" name="edit" value="Edit" class="btn btn-default" />
 	 		</form></td>';
 	 		echo "</tr>";
 	 	}
@@ -340,10 +348,14 @@ class MyAccount {
 
 
 	 private function notLoggedIn() {
-	 	echo "<meta http-equiv=\"refresh\" content=\"0; URL='login.php'\" />";
+	 	echo "<meta http-equiv=\"refresh\" content=\"0; URL='login.php?action=logout'\" />";
 	 }
 
 }
 
 $page = new MyAccount();
 ?>
+
+<body>
+</html>
+

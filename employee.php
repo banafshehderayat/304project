@@ -1,7 +1,18 @@
 <html>
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<body>
+<nav class="navbar navbar-default">
+<div class="navbar-header">
+      <h2 class="navbar-brand">Employee</h2>
+</div>
+</nav>
+<div class="container">
 <form method="POST" action="employee.php">
-	Location:
-	<select name="loc">
+	<div class="form-group">
+			<label> Location Address <label>
+	<select name="loc" class="form-control">
 		  		<?php
 		  			require_once 'util.php';
 		  			$util2 = new Util;
@@ -17,12 +28,12 @@
 				?>
 			</select>
 	<br>
-        <input type="submit" value="View Rooms" name="viewRooms"></p>
-
+        <input type="submit" value="View Rooms" name="viewRooms" class="btn btn-default"></p>
+	</div>
 
 	
 
-
+</div>
 </form>
 
 
@@ -62,7 +73,8 @@ if ($db_conn) {
 
 	   if ($_SESSION['user_type'] == 'MANAGER'){
 	       echo '<br>';
-	       echo '<a href="manager.php">Go to Manager Page</a>';	
+	       echo '<a href="manager.php">Go to Manager Page</a></br>';
+           echo '<a href="login.php?action=logout">Log out</a>';	
 	   }
 
 
@@ -73,4 +85,5 @@ if ($db_conn) {
         echo "Oracle Connect Error" . $err['message'];
 }
 ?>
+</body>
 </html>

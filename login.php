@@ -1,3 +1,14 @@
+<html>
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<body>
+<nav class="navbar navbar-default">
+<div class="navbar-header">
+      <h2 class="navbar-brand">Login / Registration</h2>
+</div>
+</nav>
+
 <?php
 error_reporting(-1);
 ini_set('display_errors',1);
@@ -426,20 +437,26 @@ class Login
         }
 
         echo '<h2>Login</h2>';
-
+	echo '<div class="container">';
         echo '<form method="post" action="' . $_SERVER['SCRIPT_NAME'] . '" name="loginform">';
+	echo '<div class="form-group">';
         echo '<label for="login_input_username">Name</label> ';
-        echo '<input id="login_input_username" type="text" name="name" required /> ';
+        echo '<input id="login_input_username" type="text" name="name" class="form-control" required /> ';
+	echo '</div>';
         echo '<br>';
+	echo '<div class="form-group">';
         echo '<label for="login_input_address">Address</label> ';
-        echo '<input id="login_input_uaddress" type="text" name="address" required /> ';
+        echo '<input id="login_input_uaddress" type="text" name="address" class="form-control" required /> ';
+	echo '</div>';
         echo '<br>';
+	echo '<div class="form-group">';
         echo '<label for="login_input_password">Password</label> ';
-        echo '<input id="login_input_password" type="password" name="password" required /> ';
+        echo '<input id="login_input_password" type="password" name="password" class="form-control" required /> ';
         echo '<br>';
-        echo '<input type="submit"  name="login" value="Log in" />';
+	echo '</div>';
+        echo '<input type="submit"  name="login" class="form-control" value="Log in" />';
         echo '</form>';
-
+	echo '</div>';
         echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=register">Register new account</a>';
     }
 
@@ -455,21 +472,29 @@ class Login
         }
 
         echo '<h2>Registration</h2>';
-
+	echo '<div class="container">';
         echo '<form method="post" action="' . $_SERVER['SCRIPT_NAME'] . '?action=register" name="registerform">';
+	echo '<div class="form-group">';
         echo '<label for="login_input_username">Name</label>';
-        echo '<input id="login_input_username" type="text" name="name" required />';
-        echo '<br>';
+        echo '<input id="login_input_username" class="form-control" type="text" name="name" required />';
+	echo '</div>';        
+	echo '<br>';
+	echo '<div class="form-group">';
         echo '<label for="login_input_email">Address</label>';
-        echo '<input id="login_input_email" type="text" name="address" required />';
-        echo '<br>';
+        echo '<input id="login_input_email" type="text" class="form-control" name="address" required />';
+	echo '</div>';         
+	echo '<br>';
+	echo '<div class="form-group">';
         echo '<label for="login_input_password_new">Password (min. 3 characters)</label>';
-        echo '<input id="login_input_password_new" class="login_input" type="password" name="password_new" pattern=".{3,}" required autocomplete="off" />';
-        echo '<br>';
+        echo '<input id="login_input_password_new" class="login_input form-control" type="password" name="password_new" pattern=".{3,}" required autocomplete="off" />';
+	echo '</div>';         
+	echo '<br>';
+	echo '<div class="form-group">';
         echo '<label for="login_input_password_repeat">Repeat password</label>';
-        echo '<input id="login_input_password_repeat" class="login_input" type="password" name="password_repeat" pattern=".{3,}" required autocomplete="off" />';
-        echo '<br>';
-        echo '<input type="submit" name="register" value="Register" />';
+        echo '<input id="login_input_password_repeat" class="login_input form-control" type="password" name="password_repeat" pattern=".{3,}" required autocomplete="off" />';
+	echo '</div>';         
+	echo '<br>';
+        echo '<input type="submit" name="register" class="form-control" value="Register" />';
         echo '</form>';
 
         echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '">Log In</a>';
@@ -478,3 +503,7 @@ class Login
 
 // Start login
 $login = new Login();
+
+?>
+</body>
+</html>

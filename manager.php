@@ -1,14 +1,28 @@
 <html>
-	<form method="POST" action="manager.php">
-	<div style="border: 1px solid black;">
-		Employee Name: <input type="text" name="empName">
-		Location Address: <select name="empLoc">
-		  		<?php 
-		  			require_once 'util.php';
-		  			$util2 = new Util;
-					$debug = False;
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<body>
+<nav class="navbar navbar-default">
+<div class="navbar-header">
+      <h2 class="navbar-brand">Manager</h2>
+</div>
+</nav>
+<div class="container">
+	<form method="POST" action="manager.php" role="form" class="form-inline">
+		<div class="form-group">
+			<label> Employee Name <label> 
+			<input class="form-control" type="text" name="empName">
+		</div>
 
-		  			$db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
+		<div class="form-group">
+			<label> Location Address <label> 
+			<select class="form-control" name="empLoc">
+		  		<?php 
+                    require_once 'util.php';
+                    $util2 = new Util;
+                    
+                    $db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
 					if ($db_conn) {
 						$result = $util2->executePlainSQL("select * from location");
 						$util2->printResultDropdown($result, 'LOCATION_ADDRESS');
@@ -16,37 +30,51 @@
 					}
 				?>
 			</select>
-		Manager ID: <input type="text" name="manId">
-		Password: <input type="text" name="pass" >
-        	<input type="submit" value="Add Employee" name="addEmployee"></p>		
+        </div>
+
+        <div class="form-group">
+            <label> Manager Id <label> 
+            <input type="text" name="manId" class="form-control">
+        </div>
+        <div class="form-group">
+			<label> Password <label> 
+			<input type="text" name="pass" class="form-control">
+		</div>
+        <input type="submit" value="Add Employee" name="addEmployee" class="btn btn-default"></p>
+    
+    <br>
+	<br>	
+
+	<div class="form-group">
+		<label> Employee ID <label> 
+		<select class="form-control"name="eID">
+	  		<?php 
+                require_once 'util.php';
+                $util2 = new Util;
+				$debug = True;
+                
+                $db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
+				if ($db_conn) {
+					$result = $util2->executePlainSQL("select employee_id from employee");
+					$util2->printResultDropdown($result, 'EMPLOYEE_ID');
+					OCILogoff($db_conn);
+				}
+			?>
+		</select>
+		<input type="submit" value="Find Employee" name="findEmployee" class="btn btn-default"></p>	
 	</div>
-	<div style="border: 1px solid black;">
-		Employee ID:<select name="eID">
-		  		<?php 
-		  			require_once 'util.php';
-		  			$util2 = new Util;
-					$debug = True;
-		  			$db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
-					if ($db_conn) {
-						$result = $util2->executePlainSQL("select employee_id from employee");
-						$util2->printResultDropdown($result, 'EMPLOYEE_ID');
-						OCILogoff($db_conn);
-					}
-				?>
-			</select>
-        	<input type="submit" value="Find Employee" name="findEmployee" ></p>		
-	</div>
+        		
+	<br>
+	<br>
 	
-		<br>
-       	Find customers that have booked all rooms in a locations:
-	<select name="custLoc">
+	<div class="form-group">
+		<label> Find customers that have booked all rooms in a locations <label>
+		<select class="form-control" name="custLoc">
 		  		<?php 
-		  			require_once 'util.php';
-		  			$util2 = new Util;
-					$debug = True;
-					if ($debug) {
-					}
-		  			$db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
+                    require_once 'util.php';
+                    $util2 = new Util;
+					
+                    $db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
 					if ($db_conn) {
 						$result = $util2->executePlainSQL("select * from location");
 						$util2->printResultDropdown($result, 'LOCATION_ADDRESS');
@@ -54,32 +82,48 @@
 					}
 				?>
 			</select>
-	<input type="submit" value="Find Customer" name="findCust"></p>	
+			<input type="submit" value="Find Customer" name="findCust" class="btn btn-default"></p>	
+	</div>
+	
+	<br>
+	<br>
 
-	Find the location with the highest/lowest average price for rooms: 
-	 <input type="radio" name="order" value="MIN"> Min
-	 <input type="radio" name="order" value="MAX"> Max
-	<input type="submit" value="Find Price" name="findExpensiveLoc"></p>
+	<div class="form-group">
+	<label>Find the location with the highest/lowest average price for rooms</label>
+	<div class="checkbox">
+  		<label>
+    		<input type="radio" name="order" value="MIN"> Min
+  		</label>
+	</div>
 	
+	<div class="checkbox">
+  		<label>
+    		<input type="radio" name="order" value="MAX"> Max
+  		</label>
+	</div>
 	
+	<input type="submit" value="Find Price" name="findExpensiveLoc" class="btn btn-default"></p>
+        </div> 
 	</form>
+</div>
+<body>
 
 	<?php
 		error_reporting(E_ERROR);
 		ini_set('display_errors',1);
-
+        
 		require_once 'util.php';
 		$util = new Util;
 		$debug = False;
-
+        
 		// User is not logged in; redirect to login page
 		session_save_path("php_sessions");
         session_start();
-	 	if (empty($_SESSION['user_is_logged_in']) || !($_SESSION['user_is_logged_in']) || ($_SESSION['user_type'] != 'MANAGER')) {
+        if (empty($_SESSION['user_is_logged_in']) || !($_SESSION['user_is_logged_in']) || ($_SESSION['user_type'] != 'MANAGER')) {
 	 		echo "<meta http-equiv=\"refresh\" content=\"0; URL='login.php?action=logout'\" />";
 	 		return;
-	 	}
-
+        }
+        
 		$db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
 		if ($db_conn) {
         		if ($debug) {
@@ -106,10 +150,10 @@
     					OCIBindByName($st, ':manID', $employee["MANAGER_ID"]);
     					OCIExecute($st);
     					$manager = OCI_Fetch_Array($st);
-
+        
     					echo '<form name="form1" method="post" action="">';
-    					echo "<table>";
-
+    					echo "<table class='table table-striped'>";
+        
             			echo "<tr><th>Employee ID</th><th>Name</th><th>Location Address</th><th>Manager Name</th></tr>";
     					echo "<tr><td><input type='text' name='eid' value='" . $employee["EMPLOYEE_ID"] . "' readonly></td>
     						      <td><input type='text' name='name' value='" . $employee["NAME"] . "' required></td>
@@ -119,11 +163,11 @@
     					
             			echo "</table>";
     					echo "<br>";
-    					echo "<input type='submit' value='update' name='update'>";
-    					echo "<input type='submit' value='delete' name='delete'>";
+    					echo "<input type='submit' value='update' name='update' class='btn btn-default'>";
+    					echo "<input type='submit' value='delete' name='delete' class='btn btn-default'>";
     					echo "</form>";
                     	OCICommit($db_conn);
-				    }
+                    }
 				} else  
 					if (array_key_exists('update', $_POST)){
 						
@@ -137,7 +181,7 @@
                 			OCIBindByName($stid, ':bind1', $bind1);
                 			OCIBindByName($stid, ':bind2', $bind2);
 							OCIBindByName($stid, ':bind3', $bind3);
-
+        
                				$success = @OCIExecute($stid);
 							
 							if ($success) {
@@ -211,7 +255,8 @@
 										OCICommit($db_conn);
 								}
 			
-			echo '<br> <a href="employee.php"> Go to Employee Page</a>';
+			echo '<br> <a href="employee.php"> Go to Employee Page</a></br>';
+            echo '<a href="login.php?action=logout">Log out</a>';
         		OCILogoff($db_conn);
 		} else {
         		$err = OCIError();
