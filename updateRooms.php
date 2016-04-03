@@ -1,9 +1,4 @@
 <html>
-	<form method="POST" action="updateRooms.php">
-
-        <input type="submit" value="View Rooms" name="viewRooms"></p>
-	</form>
-
 	<?php
 		error_reporting(-1);
 		ini_set('display_errors',1);
@@ -20,57 +15,68 @@
 	 	}
 		$db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
 		if ($db_conn) {
-        		if ($debug) {
-               		echo "Successfully connected to Oracle. \n";
-        		}
+			if ($debug) {
+				echo "Successfully connected to Oracle. \n";
+			}
+
+			if (array_key_exists('update', $_POST)){
+				foreach($_POST['row_num'] as $index){
+					$statement = "UPDATE rooms 
+								  SET TYPE = :bind1 , MAX_OCCUPANCY = :bind2 , COST_PER_DAY = :bind3 
+								  WHERE ROOM_NUMBER = :bind4 and LOCATION_ADDRESS = :bind5";
+					$stid = oci_parse($db_conn, $statement);
+					$bind1 = $_POST['type'][$index];
+					$bind2 = $_POST['max'][$index];
+					$bind3 = $_POST['cost'][$index];
+					$bind4 = $_POST['num'][$index];
+					$bind5 = $_POST['loc'][$index];
+					OCIBindByName($stid, ':bind1', $bind1);
+					OCIBindByName($stid, ':bind2', $bind2);
+					OCIBindByName($stid, ':bind3', $bind3);
+					OCIBindByName($stid, ':bind4', $bind4);
+					OCIBindByName($stid, ':bind5', $bind5);
+					OCIExecute($stid);
+				}
+			}
 			
+			// Always rum this code
+			$statement = "SELECT * FROM rooms";
+			$stid = oci_parse($db_conn, $statement);
+			OCIExecute($stid);
+			echo '<form name="form1" method="post" action="updateRooms.php">';
+			echo "<table>";
+			echo "<tr><th>Room Number</th>
+				  <th>Location Address</th>
+				  <th>Type</th>
+				  <th>Max Occupancy</th>
+				  <th>Cost Per Day</th></tr>";
 
-						if (array_key_exists('viewRooms', $_POST)){
-							$statement = "SELECT * FROM rooms";
-		          $stid = oci_parse($db_conn, $statement);
-		          OCIExecute($stid);
-							echo '<form name="form1" method="post" action="">';
-							echo "<table>";
-		        	echo "<tr><th>room_number</th><th>location_address</th><th>type</th><th>max_occupancy</th><th>cost_per_day</th></tr>";
-							$i = 0;
-		        	while ($row = OCI_Fetch_Array($stid)) {
-		            	echo "<tr><td><input type='text' name='num[]' value='" . $row["ROOM_NUMBER"] . "' readonly></td><td><input type='text' name='loc[]' value='" . $row["LOCATION_ADDRESS"] . "' readonly></td><td><input type='text'name='type[]' value='" .$row["TYPE"]."'></td><td><input type='text' name='max[]' value='" . $row["MAX_OCCUPANCY"]."'></td><td><input type='text' name='cost[]' value='" . $row["COST_PER_DAY"]."'></td></tr>";
-									$i = $i + 1;
-		        	}
-		        	echo "</table>";
-							echo "<br>";
-							echo "<input type='submit' value='update' name='update'>";
-							echo "</form>";
-		          OCICommit($db_conn);
-						} else
-							if (array_key_exists('update', $_POST)){
-								foreach($_POST['num'] as $value){
-									$index = $value - 1;
-									$statement = "UPDATE rooms SET TYPE = :bind1 , MAX_OCCUPANCY = :bind2 , COST_PER_DAY = :bind3 WHERE ROOM_NUMBER = :bind4 and LOCATION_ADDRESS = :bind5";
-									$stid = oci_parse($db_conn, $statement);
-									$bind1 = $_POST['type'][$index];
-		              $bind2 = $_POST['max'][$index];
-									$bind3 = $_POST['cost'][$index];
-									$bind4 = $_POST['num'][$index];
-									$bind5 = $_POST['loc'][$index];
-		              OCIBindByName($stid, ':bind1', $bind1);
-		              OCIBindByName($stid, ':bind2', $bind2);
-									OCIBindByName($stid, ':bind3', $bind3);
-									OCIBindByName($stid, ':bind4', $bind4);
-									OCIBindByName($stid, ':bind5', $bind5);
-		              OCIExecute($stid);
-									//$util->printResultRooms($stid);
-		                					//OCICommit($db_conn);
-								}
-							}
+			$i = 0;
+			while ($row = OCI_Fetch_Array($stid)) {
+				echo "<tr>
+					  <td><input type='text' name='num[]' value='" . $row["ROOM_NUMBER"] . "' readonly></td>
+					  <td><input type='text' name='loc[]' value='" . $row["LOCATION_ADDRESS"] . "' readonly></td>
+					  <td><input type='text' name='type[]' value='" .$row["TYPE"]."'></td>
+					  <td><input type='text' name='max[]' value='" . $row["MAX_OCCUPANCY"]."'></td>
+					  <td><input type='text' name='cost[]' value='" . $row["COST_PER_DAY"]."'></td>
+					  <input type='hidden' name='row_num[]' value='" . $i . "'/>
+					  </tr>";
+				$i = $i + 1;
+			}
 
-        		
-echo '<a href="employee.php"> go back </a>';
-OCILogoff($db_conn);
+			echo "</table>";
+			echo "<br>";
+			echo "<input type='submit' value='Update' name='update'>";
+			echo "</form>";
+			OCICommit($db_conn);
+
+
+			echo '<a href="employee.php"> Back to the Employee Page </a>';
+			OCILogoff($db_conn);
 		} else {
-        		$err = OCIError();
-        		echo "Oracle Connect Error" . $err['message'];
+			$err = OCIError();
+			echo "Oracle Connect Error" . $err['message'];
 		}
 
-	?>
-</html>
+		?>
+		</html>

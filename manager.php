@@ -6,7 +6,7 @@
 		  		<?php 
 		  			require_once 'util.php';
 		  			$util2 = new Util;
-					$debug = True;
+					$debug = False;
 					if ($debug) {
 					}
 		  			$db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
@@ -26,7 +26,7 @@
         	<input type="submit" value="Find Employee" name="findEmployee"></p>		
 	</div>
 	
-
+		<br>
        	Find customers that have booked all rooms in a locations:
 	<select name="custLoc">
 		  		<?php 
@@ -60,37 +60,56 @@
 		require_once 'util.php';
 		$util = new Util;
 		$debug = False;
+
 		// User is not logged in; redirect to login page
 		session_save_path("php_sessions");
-        	session_start();
+        session_start();
 	 	if (empty($_SESSION['user_is_logged_in']) || !($_SESSION['user_is_logged_in']) || ($_SESSION['user_type'] != 'MANAGER')) {
 	 		echo "<meta http-equiv=\"refresh\" content=\"0; URL='login.php?action=logout'\" />";
 	 		return;
 	 	}
+
 		$db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
 		if ($db_conn) {
         		if ($debug) {
                		echo "Successfully connected to Oracle. \n";
         		}
 				if (array_key_exists('findEmployee', $_POST)){
-					$statement = "SELECT * FROM employee where EMPLOYEE_ID = :bind";
+					$statement = "SELECT employee_id, name, location_address, manager_id 
+							  	  FROM employee 
+							  	  WHERE EMPLOYEE_ID = :bind";
                 			$stid = oci_parse($db_conn, $statement);
                 			$bind = $_POST['eID'];
                				OCIBindByName($stid, ':bind', $bind);
                 			OCIExecute($stid);
-					//$util->printResultTable($stid , ["EMPLOYEE_ID", "NAME", "LOCATION_ADDRESS", "MANAGER_ID"]);
-					$row = OCI_Fetch_Array($stid);
+					
+					$employee = OCI_Fetch_Array($stid);
+
+					// Get manager name
+					$manStatement = "SELECT name
+									 FROM employee
+									 WHERE employee_id = :manID";
+					$st = oci_parse($db_conn, $manStatement);
+					OCIBindByName($st, ':manID', $employee["MANAGER_ID"]);
+					OCIExecute($st);
+					$manager = OCI_Fetch_Array($st);
+
 					echo '<form name="form1" method="post" action="">';
 					echo "<table>";
-        			echo "<tr><th>employee_id</th><th>name</th><th>location_address</th><th>manager_id</th></tr>";
-					echo "<tr><td><input type='text' name='eid' value='" . $row["EMPLOYEE_ID"] . "' readonly></td><td><input type='text' name='name' value='" . $row["NAME"] . "'></td><td><input type='text'name='loc' value='" .$row["LOCATION_ADDRESS"]."'></td><td><input type='text'name='mid' value='" .$row["MANAGER_ID"]."' readonly></td></tr>"; 
+
+        			echo "<tr><th>Employee ID</th><th>Name</th><th>Location Address</th><th>Manager Name</th></tr>";
+					echo "<tr><td><input type='text' name='eid' value='" . $employee["EMPLOYEE_ID"] . "' readonly></td>
+						      <td><input type='text' name='name' value='" . $employee["NAME"] . "'></td>
+						      <td><input type='text'name='loc' value='" .$employee["LOCATION_ADDRESS"]."'></td>
+						      <td><input type='text'name='manName' value='" .$manager["NAME"]."' readonly></td>
+						  </tr>"; 
 					
         			echo "</table>";
 					echo "<br>";
 					echo "<input type='submit' value='update' name='update'>";
 					echo "<input type='submit' value='delete' name='delete'>";
 					echo "</form>";
-                			OCICommit($db_conn);
+                	OCICommit($db_conn);
 				} else  
 					if (array_key_exists('update', $_POST)){
 						
@@ -98,14 +117,21 @@
 							WHERE EMPLOYEE_ID = :bind3";
 							$stid = oci_parse($db_conn, $statement);
 							$bind1 = $_POST['name'];
-                					$bind2 = $_POST['loc'];
+                			$bind2 = $_POST['loc'];
 							$bind3 = $_POST['eid'];
-                					OCIBindByName($stid, ':bind1', $bind1);
-                					OCIBindByName($stid, ':bind2', $bind2);
+                			OCIBindByName($stid, ':bind1', $bind1);
+                			OCIBindByName($stid, ':bind2', $bind2);
 							OCIBindByName($stid, ':bind3', $bind3);
-               						OCIExecute($stid);
-							echo "Table Updated: " . "employee: " . $bind1 . " has been updated!";
-                					OCICommit($db_conn);
+               				$success = @OCIExecute($stid);
+							
+							if ($success) {
+								echo '<script type="text/javascript" >alert("Employee: ' . $bind1 . ' has been updated!"); </script>';
+							}
+							else {
+								echo '<script type="text/javascript" >alert("Location \"' . $bind2 . '\" is not valid"); </script>';
+							}
+							
+                			OCICommit($db_conn);
 										
 					} else 
 						if (array_key_exists('delete', $_POST)) {
@@ -165,9 +191,9 @@
 										OCICommit($db_conn);
 								}
 			
-			echo '<br> <a href="employee.php"> go to employee page</a>';
+			echo '<br> <a href="employee.php"> Go to Employee Page</a>';
         		OCILogoff($db_conn);
-		}else {
+		} else {
         		$err = OCIError();
         		echo "Oracle Connect Error" . $err['message'];
 		}		

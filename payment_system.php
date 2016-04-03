@@ -27,7 +27,8 @@
 			Customer Name: <input type="text" name="custName" required> <br>
 			Customer Address: <input type="text" name="custAddr" required> <br>
       		
-      		<input type="submit" value="Check Price" name="checkCost"></br>
+      		<input type="submit" value="Check Price" name="checkCost">
+      		<input type="submit" value="Show cheapest room!" name="lowco"></p>
 
 			Payment type: 	
 				<select id="paymentType" name="paymentType" required>
@@ -37,7 +38,6 @@
 				</select> <br>
 			Card Number: <input type="text" id="cardNo" name="cardNo" required> <br>
 			<input type="submit" value="Save Reservation" name="saveRes">
-			<input type="submit" value="Pick cheapest room!" name="lowco"></p>
 		</form>
 
 		<script type="text/javascript">
@@ -75,15 +75,12 @@
 				$_POST['room'] = trim(substr($_POST['loc_room'], 7, 3));
 				$_POST['loc'] = trim(substr($_POST['loc_room'], 23));
 
-				$amount = calculatePayment($_POST, $db_conn);
-
 				// verify no overlapping reservations
                 $stid = findExistingReservation($_POST, $db_conn);
 
 				// check if room booked
 				if (oci_fetch_array($stid, OCI_BOTH) != false) {
-					echo '<h2>Room already booked! Try another date.</h2>';
-					echo '<br>';
+					echo '<script type="text/javascript" >alert("This room is already booked! Try another date."); </script>';
 				}
 				else // otherwise proceed
 				{ 
@@ -97,6 +94,7 @@
 			        OCIExecute($stid, OCI_DEFAULT);
 
 			        // if so, insert all values into reserves.
+			        $amount = calculatePayment($_POST, $db_conn);
 			        if (oci_fetch_array($stid, OCI_BOTH) != false) {
 						//cash payment
 						if ($_POST['paymentType'] == "Cash") {
@@ -108,6 +106,7 @@
 						}
 						
 						insertIntoReserves($_POST, $util, $db_conn);
+						echo '<script type="text/javascript" >alert("Reservation added!"); </script>';
                         
                         //Print Reservation Id
                         $stid = findExistingReservation($_POST, $db_conn);
@@ -260,13 +259,11 @@
 
 			$row = OCI_Fetch_Array($stid, OCI_BOTH);
 
-			echo '<h3>The cheapest available room is room number: ';
-			echo $row['ROOM_NUMBER'];
-			echo ' at location: ';
-			echo $row['LOCATION_ADDRESS'];
-			echo ' for $';
-			echo $row['COST_PER_DAY'];
-			echo ' per day</h3>';
+			echo '<script type="text/javascript" >alert(
+				"The cheapest available room is room number ' . 
+				$row['ROOM_NUMBER'] . ' at location ' . 
+				$row['LOCATION_ADDRESS'] . ' for $' . 
+				$row['COST_PER_DAY'] . ' per day"); </script>';
 		}
         
         function findExistingReservation($array, $db_conn) {
