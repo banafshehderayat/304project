@@ -7,11 +7,10 @@
 	<body>
 		<form method="POST" action="payment_system.php">
 			Location & Room:
-			<!-- <select required name="locroom"> -->
 				<?php
 		  			require_once 'util.php';
 		  			$util2 = new Util;
-					$debug = True;
+					$debug = False;
 					if ($debug) {
 					}
 		  			$db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
@@ -23,20 +22,22 @@
 						echo "</select><br>";
 					}
 				?>
-			</select>
 			Start Date : <input type="date" name="startDate" required><br>
-      End Date : <input type="date" name="endDate" required><br>
+      		End Date : <input type="date" name="endDate" required><br>
 			Customer Name: <input type="text" name="custName" required> <br>
 			Customer Address: <input type="text" name="custAddr" required> <br>
-      <input type="submit" value="Check Price" name="checkCost"></br>
+      		
+      		<input type="submit" value="Check Price" name="checkCost"></br>
 
-			Payment type: 	<select id="paymentType" name="paymentType" required>
-						<option value="Cash">Cash</option>
-						<option value="Mastercard">Mastercard</option>
-						<option value="Visa">Visa</option>
-					</select> <br>
+			Payment type: 	
+				<select id="paymentType" name="paymentType" required>
+					<option value="Cash">Cash</option>
+					<option value="Mastercard">Mastercard</option>
+					<option value="Visa">Visa</option>
+				</select> <br>
 			Card Number: <input type="text" id="cardNo" name="cardNo" required> <br>
-			<input type="submit" value="Save Reservation" name="saveRes"></p>
+			<input type="submit" value="Save Reservation" name="saveRes">
+			<input type="submit" value="Pick cheapest room!" name="lowco"></p>
 		</form>
 
 		<script type="text/javascript">
@@ -78,24 +79,35 @@
 
 				// verify no overlapping reservations
 				$statement = 'SELECT * FROM reserves WHERE (location_address = :bind1 and room_number = :bind2) and ((start_date between :bind3 and :bind4) or (end_date between :bind3 and :bind4) or (:bind3 between start_date and end_date) or (:bind4 between start_date and end_date))';
-        $stid = oci_parse($db_conn, $statement);
-        $bind1 = $_POST['loc'];
-        $bind2 = $_POST['room'];
+		        $stid = oci_parse($db_conn, $statement);
+		        $bind1 = $_POST['loc'];
+		        $bind2 = $_POST['room'];
 				$bind3 = $_POST['startDate'];
-        $bind4 = $_POST['endDate'];
-        OCIBindByName($stid, ':bind1', $bind1);
-        OCIBindByName($stid, ':bind2', $bind2);
+		        $bind4 = $_POST['endDate'];
+		        OCIBindByName($stid, ':bind1', $bind1);
+		        OCIBindByName($stid, ':bind2', $bind2);
 				OCIBindByName($stid, ':bind3', $bind3);
-        OCIBindByName($stid, ':bind4', $bind4);
-        OCIExecute($stid);
+		        OCIBindByName($stid, ':bind4', $bind4);
+		        OCIExecute($stid);
 
 				// check if room booked
 				if (oci_fetch_array($stid, OCI_BOTH) != false) {
 					echo '<h2>Room already booked! Try another date.</h2>';
 					echo '<br>';
 				}
-				else
-				{ // otherwise proceed
+				else // otherwise proceed
+				{ 
+					// check if customer exists
+					$statement = 'SELECT * FROM customers WHERE cname = :bind1 and address = :bind2';
+			        $stid = oci_parse($db_conn, $statement);
+			        $bind1 = $_POST['custName'];
+			        $bind2 = $_POST['custAddr'];
+			        OCIBindByName($stid, ':bind1', $bind1);
+			        OCIBindByName($stid, ':bind2', $bind2);
+			        OCIExecute($stid);
+
+			        // if so, insert all values into reserves.
+			        if (oci_fetch_array($stid, OCI_BOTH) != false) {
 						//cash payment
 						if ($_POST['paymentType'] == "Cash") {
 							addCashPayment($amount, $util, $db_conn, $debug);
@@ -104,31 +116,19 @@
 						{
 							addCardPayment($amount, $_POST['cardNo'], $util, $db_conn, $debug);
 						}
-
-						// check if customer exists
-						$statement = 'SELECT * FROM customers WHERE cname = :bind1 and address = :bind2';
-		        $stid = oci_parse($db_conn, $statement);
-		        $bind1 = $_POST['custName'];
-		        $bind2 = $_POST['custAddr'];
-		        OCIBindByName($stid, ':bind1', $bind1);
-		        OCIBindByName($stid, ':bind2', $bind2);
-		        OCIExecute($stid);
-
-		        // if so, insert all values into reserves.
-		        if (oci_fetch_array($stid, OCI_BOTH) != false) {
-							insertIntoReserves($_POST, $util, $db_conn);
-						}
-						else // otherwise, add customer to customer db first, then insert all values into reserves
-						{
-							insertIntoCustomers($_POST, $util, $db_conn);
-							if ($debug) { echo "Customer added<br>"; }
-							insertIntoReserves($_POST, $util, $db_conn);
-						}
-
+						
+						insertIntoReserves($_POST, $util, $db_conn);
 						echo "<h2>Reservation added!</h2>";
+					}
+					else // otherwise, advise user to register
+					{
+						echo '<h2 style="color:#ff0000">Either something is wrong with the customer info you entered, or you have not registered!</h2><h2>Please click the login link in the nav to register if so.</h2>';
+					}
 				}
 			} else if (array_key_exists('checkCost', $_POST)) {
 				calculatePayment($_POST, $db_conn);
+			} else if (array_key_exists('lowco', $_POST)) {
+				getTheCheapSeats($db_conn);		
 			}
 
 			if ($debug) {
@@ -228,21 +228,6 @@
 			OCICommit($db_conn);
 		}
 
-		function insertIntoCustomers($array, $util, $db_conn) {
-			$tuple = array (
-				":bind1" => $array['custName'],
-				":bind2" => $array['custAddr'],
-				":bind3" => null,
-				":bind4" => "JOIefE"
-			);
-			$allTuple = array (
-				$tuple
-			);
-
-			$util->executeBoundSQL("insert into customers values (:bind1, :bind2, :bind3, :bind4)", $allTuple);
-			OCICommit($db_conn);
-		}
-
 		function calculatePayment($array, $db_conn) {
 			date_default_timezone_set('UTC');
 			$datediff = strtotime($array['endDate']) - strtotime($array['startDate']);
@@ -266,6 +251,22 @@
 			echo $amount;
 			echo '</h2>';
 			return $amount;
+		}
+
+		function getTheCheapSeats($db_conn) {
+			$statement = 'SELECT * FROM rooms r where r.cost_per_day in (SELECT MIN(cost_per_day) FROM rooms) and ROWNUM=1';
+			$stid = oci_parse($db_conn, $statement);
+			OCIExecute($stid);
+
+			$row = OCI_Fetch_Array($stid, OCI_BOTH);
+
+			echo '<h3>The cheapest available room is room number: ';
+			echo $row['ROOM_NUMBER'];
+			echo ' at location: ';
+			echo $row['LOCATION_ADDRESS'];
+			echo ' for $';
+			echo $row['COST_PER_DAY'];
+			echo ' per day</h3>';
 		}
 		?>
 	</body>

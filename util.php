@@ -61,6 +61,7 @@ function executePlainSQL($cmdstr) { //takes a plain (no bound variables) SQL com
 }
 
 function printResultTable($result, $cols) { //prints results from a select statement
+
 	$row = OCI_Fetch_Array($result, OCI_BOTH);	
 	
 	

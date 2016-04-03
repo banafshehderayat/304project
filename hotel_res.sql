@@ -232,6 +232,9 @@ insert into rooms
 values (5, '123 Main Street', 'Single', 1, 50);
 
 insert into rooms
+values (6, '111 UBC', 'Single', 1, 50);
+
+insert into rooms
 values (1, '111 UBC', 'King Room', 4, 150);
 
 insert into rooms
@@ -264,6 +267,7 @@ insert into reserves
 values ('Bennet Abraham', '6223 Bateman St. Berkeley, CA 94705', '123 Main Street', 4, 0736, '01-APR-16', '05-APR-16');
 
 insert into reserves
+
 values ('Elliot', '010 Robot St', '111 UBC', 1, 6655, '06-APR-16', '09-APR-16');
 
 insert into reserves
@@ -274,3 +278,4 @@ values ('Elliot', '010 Robot St', '111 UBC', 3, 1122, '18-APR-16', '19-APR-16');
 
 insert into reserves
 values ('Elliot', '010 Robot St', '111 UBC', 4, 9900, '20-APR-16', '23-APR-16');
+
