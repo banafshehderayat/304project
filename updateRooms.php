@@ -1,6 +1,6 @@
 <html>
 	<?php
-		error_reporting(-1);
+		error_reporting(E_ERROR);
 		ini_set('display_errors',1);
 
 		require_once 'util.php';
@@ -69,7 +69,6 @@
 			echo "<input type='submit' value='Update' name='update'>";
 			echo "</form>";
 			OCICommit($db_conn);
-
 
 			echo '<a href="employee.php"> Back to the Employee Page </a>';
 			OCILogoff($db_conn);
