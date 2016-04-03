@@ -263,17 +263,15 @@ class MyAccount {
 		return true;
      }
 
-	 /**
-	  * TODO: split into "upcoming" and reservation history
-	  */
 	 private function showAccountSummary() {
 	 	// Get customer's reservations
 	 	$reservations = $this->getReservationDetails();
 
 	 	// Display resrevations
 	 	$this->printReservations($reservations);
-
-	 	echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=logout">Log out</a>';
+        
+        echo '<a href="payment_system.php">Make Reservation!</a><br>';
+	 	echo '<a href="login.php?action=logout">Log out</a>';
 	 }
 
 

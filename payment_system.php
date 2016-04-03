@@ -24,8 +24,6 @@
 				?>
 			Start Date : <input type="date" name="startDate" required><br>
       		End Date : <input type="date" name="endDate" required><br>
-			Customer Name: <input type="text" name="custName" required> <br>
-			Customer Address: <input type="text" name="custAddr" required> <br>
       		
       		<input type="submit" value="Check Price" name="checkCost">
       		<input type="submit" value="Show cheapest room!" name="lowco"></p>
@@ -56,6 +54,19 @@
 		</script>
 
 		<?php
+        
+        if(session_status() == PHP_SESSION_NONE) {
+            session_save_path("php_sessions");
+            session_start();
+        }
+        
+        if (empty($_SESSION['user_is_logged_in']) || !($_SESSION['user_is_logged_in']) || $_SESSION['user_type'] != 'CUSTOMER') {
+	 	    notLoggedIn();
+	 		return false;
+	 	}
+        echo '<a href="customer.php">Go to My Account!</a><br>';
+        echo '<a href="login.php?action=logout">Log out</a>';
+        
 		error_reporting(-1);
 		ini_set('display_errors',1);
 
@@ -85,17 +96,22 @@
 				else // otherwise proceed
 				{ 
 					// check if customer exists
-					$statement = 'SELECT * FROM customers WHERE cname = :bind1 and address = :bind2';
+					$statement = 'SELECT * FROM customers WHERE cid = :bind1';
 			        $stid = oci_parse($db_conn, $statement);
-			        $bind1 = $_POST['custName'];
-			        $bind2 = $_POST['custAddr'];
+			        $bind1 = $_SESSION['id'];
 			        OCIBindByName($stid, ':bind1', $bind1);
-			        OCIBindByName($stid, ':bind2', $bind2);
 			        OCIExecute($stid, OCI_DEFAULT);
 
+                    $row = oci_fetch_array($stid, OCI_BOTH);
+                    
 			        // if so, insert all values into reserves.
 			        $amount = calculatePayment($_POST, $db_conn);
-			        if (oci_fetch_array($stid, OCI_BOTH) != false) {
+			        if ($row != false) {
+                        
+                        //Add customer name info
+                        $_POST['custAddr'] = $row['ADDRESS'];
+                        $_POST['custName'] = $row['CNAME'];
+                        
 						//cash payment
 						if ($_POST['paymentType'] == "Cash") {
 							addCashPayment($amount, $util, $db_conn, $debug);
@@ -281,6 +297,10 @@
             
             return $stid;
 		}
+        
+        function notLoggedIn() {
+           echo "<meta http-equiv=\"refresh\" content=\"0; URL='login.php?action=logout'\" />";
+        }
 		?>
 	</body>
 </html>
