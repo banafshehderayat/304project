@@ -1,7 +1,6 @@
 <html>
 	<form method="POST" action="manager.php">
 	<div style="border: 1px solid black;">
-		Employee ID: <input type="text" name="empId">
 		Employee Name: <input type="text" name="empName">
 		Location Address: <select name="empLoc">
 		  		<?php 
@@ -27,6 +26,31 @@
         	<input type="submit" value="Find Employee" name="findEmployee"></p>		
 	</div>
 	
+
+       	Find customers that have booked all rooms in a locations:
+	<select name="custLoc">
+		  		<?php 
+		  			require_once 'util.php';
+		  			$util2 = new Util;
+					$debug = True;
+					if ($debug) {
+					}
+		  			$db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
+					if ($db_conn) {
+						$result = $util2->executePlainSQL("select * from location");
+						$util2->printResultDropdown($result, 'LOCATION_ADDRESS');
+						OCILogoff($db_conn);
+					}
+				?>
+			</select>
+	<input type="submit" value="Find Customer" name="findCust"></p>	
+
+	Find the location with the highest/lowest average price for rooms: 
+	 <input type="radio" name="order" value="MIN"> Min
+	 <input type="radio" name="order" value="MAX"> Max
+	<input type="submit" value="Find Price" name="findExpensiveLoc"></p>
+	
+	
 	</form>
 
 	<?php
@@ -35,8 +59,14 @@
 
 		require_once 'util.php';
 		$util = new Util;
-		$debug = True;
-
+		$debug = False;
+		// User is not logged in; redirect to login page
+		session_save_path("php_sessions");
+        	session_start();
+	 	if (empty($_SESSION['user_is_logged_in']) || !($_SESSION['user_is_logged_in']) || ($_SESSION['user_type'] != 'MANAGER')) {
+	 		echo "<meta http-equiv=\"refresh\" content=\"0; URL='login.php?action=logout'\" />";
+	 		return;
+	 	}
 		$db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
 		if ($db_conn) {
         		if ($debug) {
@@ -93,24 +123,49 @@
 							OCICommit($db_conn);
 						} else 
 							if (array_key_exists('addEmployee', $_POST)){
-								$statement = "INSERT into employee (EMPLOYEE_ID, NAME, LOCATION_ADDRESS, MANAGER_ID, PASSWORD)		
-								values (:bind1 , :bind2 , :bind3, :bind4, :bind5)";
+								$statement = "INSERT into employee ( NAME, LOCATION_ADDRESS, MANAGER_ID, PASSWORD)		
+								values ( :bind1 , :bind2, :bind3, :bind4)";
 								$stid = oci_parse($db_conn, $statement);
-								$bind1 = $_POST['empId'];
-                						$bind2 = $_POST['empName'];
-								$bind3 = $_POST['empLoc'];
-								$bind4 = $_POST['manId'];
-								$bind5 = $_POST['pass'];	
+								
+                						$bind1 = $_POST['empName'];
+								$bind2 = $_POST['empLoc'];
+								$bind3 = $_POST['manId'];
+								$bind4 = $_POST['pass'];	
+								
 								OCIBindByName($stid, ':bind1', $bind1);
 								OCIBindByName($stid, ':bind2', $bind2);
 								OCIBindByName($stid, ':bind3', $bind3);
 								OCIBindByName($stid, ':bind4', $bind4);
-								OCIBindByName($stid, ':bind5', $bind5);
 								OCIExecute($stid);
 								OCICommit($db_conn);	
-							}
-
-
+							} else 
+								if(array_key_exists ('findCust', $_POST)){
+									$statement = "SELECT cname FROM customers where NOT EXISTS ((select room_number from location Natural JOIN rooms where location_address=:bind1) MINUS (select room_number from reserves where reserves.name = customers.cname and reserves.address = customers.address))";
+											$stid = oci_parse($db_conn, $statement);											
+											$bind1 = $_POST['custLoc'];
+											OCIBindByName($stid, ':bind1', $bind1);
+											OCIExecute($stid);
+											$util->printResultTable($stid , ["CNAME"]);
+											OCICommit($db_conn);
+								} else
+									 if (array_key_exists ('findExpensiveLoc' , $_POST)){
+										$bind = $_POST['order'];
+										if ($bind == 'MAX'){
+											$statement = "select AVG(cost_per_day), location_address from rooms group by 											location_address HAVING AVG(cost_per_day) = (select MAX(AVG(cost_per_day)) from rooms 											group by location_address)";									
+										} else {
+											$statement = "select AVG(cost_per_day), location_address from rooms group by 											location_address HAVING AVG(cost_per_day) = (select MIN(AVG(cost_per_day)) from rooms 											group by location_address)";
+										}
+										
+										$stid = oci_parse($db_conn, $statement);
+										
+										OCIExecute($stid);
+										
+										$row = OCI_Fetch_Array($stid, OCI_BOTH);
+										echo "average is : " . $row[0] . " for location: " . $row[1] ;
+										OCICommit($db_conn);
+								}
+			
+			echo '<br> <a href="employee.php"> go to employee page</a>';
         		OCILogoff($db_conn);
 		}else {
         		$err = OCIError();

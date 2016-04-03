@@ -1,6 +1,6 @@
 <html>
 	<form method="POST" action="updateRooms.php">
-		<input type="submit" value="back" name="back">
+
         <input type="submit" value="View Rooms" name="viewRooms"></p>
 	</form>
 
@@ -10,17 +10,21 @@
 
 		require_once 'util.php';
 		$util = new Util;
-		$debug = True;
-
+		$debug = False;
+		// User is not logged in; redirect to login page
+		session_save_path("php_sessions");
+        	session_start();
+	 	if (empty($_SESSION['user_is_logged_in']) || !($_SESSION['user_is_logged_in']) || ($_SESSION['user_type'] == 'CUSTOMER')) {
+	 		echo "<meta http-equiv=\"refresh\" content=\"0; URL='login.php?action=logout'\" />";
+	 		return;
+	 	}
 		$db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
 		if ($db_conn) {
         		if ($debug) {
                		echo "Successfully connected to Oracle. \n";
         		}
+			
 
-        		if (array_key_exists('back', $_POST)){
-							header('Location: http://www.ugrad.cs.ubc.ca/~j7l8/employee.php');
-						} else
 						if (array_key_exists('viewRooms', $_POST)){
 							$statement = "SELECT * FROM rooms";
 		          $stid = oci_parse($db_conn, $statement);
@@ -60,7 +64,9 @@
 								}
 							}
 
-        		OCILogoff($db_conn);
+        		
+echo '<a href="employee.php"> go back </a>';
+OCILogoff($db_conn);
 		} else {
         		$err = OCIError();
         		echo "Oracle Connect Error" . $err['message'];
