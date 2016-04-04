@@ -7,7 +7,17 @@
 <nav class="navbar navbar-default">
     <div class="navbar-header">
       <a class="navbar-brand" href="employee.php">Employee Console</a>
-      <a class="navbar-brand" href="login.php?action=logout">Log out</a>
+      <?php
+        if(session_status() == PHP_SESSION_NONE) {
+            session_save_path("php_sessions");
+            session_start();
+        }
+
+        if ($_SESSION['user_type'] == 'MANAGER') {
+          echo '<a class="navbar-brand" href="manager.php">Go to Manager Page</a>';
+        }
+     ?>
+     <a class="navbar-brand" href="login.php?action=logout">Log out</a>
     </div>
 </nav>
 <div class="container">
@@ -45,12 +55,15 @@
     $util = new Util;
     $debug = False;
     // User is not logged in; redirect to login page
-    session_save_path("php_sessions");
-    session_start();
-    	if (empty($_SESSION['user_is_logged_in']) || !($_SESSION['user_is_logged_in']) || ($_SESSION['user_type'] == 'CUSTOMER')) {
+    if(session_status() == PHP_SESSION_NONE) {
+            session_save_path("php_sessions");
+            session_start();
+    }
+    
+    if (empty($_SESSION['user_is_logged_in']) || !($_SESSION['user_is_logged_in']) || ($_SESSION['user_type'] == 'CUSTOMER')) {
     	 	echo "<meta http-equiv=\"refresh\" content=\"0; URL='login.php?action=logout'\" />";
     	 	return;
-    	 }
+    }
 
     $db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
     if ($db_conn) {
@@ -69,14 +82,6 @@
                               	OCICommit($db_conn);
             } 
     	   echo '<a href="updateRooms.php" class="btn btn-default"> Update Rooms</a>';
-
-
-    	   if ($_SESSION['user_type'] == 'MANAGER'){
-    	       echo '<br>';
-    	       echo '<a href="manager.php" class="btn btn-default">Go to Manager Page</a></br>';
-               echo '<a href="login.php?action=logout" class="btn btn-default">Log out</a>';	
-    	   }
-
 
             OCILogoff($db_conn);
 
