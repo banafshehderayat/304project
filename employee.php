@@ -22,7 +22,7 @@
 </nav>
 <div class="container">
 <form method="POST" action="employee.php">
-	<div class="form-group">
+	<div class="form-inline">
 	<select name="loc" class="form-control" style="width:200px">
 		  		<?php
 		  			require_once 'util.php';
@@ -38,7 +38,7 @@
   					}
 				?>
 		</select>
-        <input type="submit" value="View Rooms" name="viewRooms" class="btn btn-default"></p>
+        <input type="submit" value="View Rooms" name="viewRooms" class="btn btn-default .pull-right"></p>
 	</div>
 
 	
