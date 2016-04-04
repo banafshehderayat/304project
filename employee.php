@@ -38,54 +38,55 @@
 </div>
 </form>
 
+<div class="container">
+    <?php
+    error_reporting(-1);
+    ini_set('display_errors',1);
 
-<?php
-error_reporting(-1);
-ini_set('display_errors',1);
+    require_once 'util.php';
+    $util = new Util;
+    $debug = False;
+    // User is not logged in; redirect to login page
+    session_save_path("php_sessions");
+    session_start();
+    	if (empty($_SESSION['user_is_logged_in']) || !($_SESSION['user_is_logged_in']) || ($_SESSION['user_type'] == 'CUSTOMER')) {
+    	 	echo "<meta http-equiv=\"refresh\" content=\"0; URL='login.php?action=logout'\" />";
+    	 	return;
+    	 }
 
-require_once 'util.php';
-$util = new Util;
-$debug = False;
-// User is not logged in; redirect to login page
-session_save_path("php_sessions");
-session_start();
-	if (empty($_SESSION['user_is_logged_in']) || !($_SESSION['user_is_logged_in']) || ($_SESSION['user_type'] == 'CUSTOMER')) {
-	 	echo "<meta http-equiv=\"refresh\" content=\"0; URL='login.php?action=logout'\" />";
-	 	return;
-	 }
+    $db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
+    if ($db_conn) {
+            if ($debug) {
+                    echo "Successfully connected to Oracle. \n";
+            }
 
-$db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
-if ($db_conn) {
-        if ($debug) {
-                echo "Successfully connected to Oracle. \n";
-        }
+    		if (array_key_exists('viewRooms', $_POST)) {
 
-		if (array_key_exists('viewRooms', $_POST)) {
-
-          			$statement = "SELECT * FROM rooms where location_address = :bind";
-                          	$stid = oci_parse($db_conn, $statement);
-                          	$bind = $_POST['loc'];
-                          	OCIBindByName($stid, ':bind', $bind);
-                          	OCIExecute($stid);
-                          	$util->printResultTable($stid , ["ROOM_NUMBER", "LOCATION_ADDRESS", "TYPE", "MAX_OCCUPANCY", "COST_PER_DAY"]);
-                          	OCICommit($db_conn);
-        } 
-	   echo '<a href="updateRooms.php" class="btn btn-default"> Update Rooms</a>';
-
-
-	   if ($_SESSION['user_type'] == 'MANAGER'){
-	       echo '<br>';
-	       echo '<a href="manager.php" class="btn btn-default">Go to Manager Page</a></br>';
-           echo '<a href="login.php?action=logout" class="btn btn-default">Log out</a>';	
-	   }
+              			$statement = "SELECT * FROM rooms where location_address = :bind";
+                              	$stid = oci_parse($db_conn, $statement);
+                              	$bind = $_POST['loc'];
+                              	OCIBindByName($stid, ':bind', $bind);
+                              	OCIExecute($stid);
+                              	$util->printResultTable($stid , ["ROOM_NUMBER", "LOCATION_ADDRESS", "TYPE", "MAX_OCCUPANCY", "COST_PER_DAY"]);
+                              	OCICommit($db_conn);
+            } 
+    	   echo '<a href="updateRooms.php" class="btn btn-default"> Update Rooms</a>';
 
 
-        OCILogoff($db_conn);
+    	   if ($_SESSION['user_type'] == 'MANAGER'){
+    	       echo '<br>';
+    	       echo '<a href="manager.php" class="btn btn-default">Go to Manager Page</a></br>';
+               echo '<a href="login.php?action=logout" class="btn btn-default">Log out</a>';	
+    	   }
 
-      } else {
-        $err = OCIError();
-        echo "Oracle Connect Error" . $err['message'];
-}
-?>
+
+            OCILogoff($db_conn);
+
+          } else {
+            $err = OCIError();
+            echo "Oracle Connect Error" . $err['message'];
+    }
+    ?>
+</div>
 </body>
 </html>

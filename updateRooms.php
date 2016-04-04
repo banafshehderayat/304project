@@ -11,7 +11,7 @@
       <a class="navbar-brand" href="employee.php">Go back Employee Console</a>
     </div>
 </nav>
-
+<div class="container">
 	<?php
 		error_reporting(E_ERROR);
 		ini_set('display_errors',1);
@@ -90,5 +90,6 @@
 		}
 
 		?>
+    </div>
 </body>
 		</html>

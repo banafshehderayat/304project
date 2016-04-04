@@ -6,11 +6,11 @@
 <body>
 <nav class="navbar navbar-default">
     <div class="navbar-header">
-      <a class="navbar-brand" href="login.php">Login / Registration</a>
+      <a class="navbar-brand" href="login.php">Login</a>
       <a class="navbar-brand" href="login.php?action=register">Register new account</a>
     </div>
 </nav>
-
+<div class="container">
 <?php
 error_reporting(-1);
 ini_set('display_errors',1);
@@ -497,8 +497,6 @@ class Login
 	echo '<br>';
         echo '<input type="submit" name="register" class="form-control" value="Register" />';
         echo '</form>';
-
-        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '" class="btn btn-default"> Go back to Log In</a>';
     }
 }
 
@@ -506,5 +504,6 @@ class Login
 $login = new Login();
 
 ?>
+</div>
 </body>
 </html>
