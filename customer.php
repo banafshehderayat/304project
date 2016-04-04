@@ -53,7 +53,7 @@ class MyAccount {
         }
 
         // User is not logged in; redirect to login page
-	 	if (empty($_SESSION['user_is_logged_in']) || !($_SESSION['user_is_logged_in'] || $_SESSION['user_type'] != 'CUSTOMER')) {
+	 	if (empty($_SESSION['user_is_logged_in']) || !($_SESSION['user_is_logged_in']) || $_SESSION['user_type'] != 'CUSTOMER') {
 	 		$this->notLoggedIn();
 	 		return false;
 	 	}
