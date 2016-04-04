@@ -8,7 +8,7 @@
 <nav class="navbar navbar-default">
     <div class="navbar-header">
       <a class="navbar-brand" href="updateRooms.php">Update Rooms</a>
-      <a class="navbar-brand" href="employee.php">Go back Employee Console</a>
+      <a class="navbar-brand" href="employee.php">Go back to Employee Console</a>
     </div>
 </nav>
 <div class="container">
