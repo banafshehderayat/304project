@@ -13,8 +13,7 @@
 <div class="container">
 <form method="POST" action="employee.php">
 	<div class="form-group">
-			<label> Location Address <label>
-	<select name="loc" class="form-control">
+	<select name="loc" class="form-control" style="width:200px">
 		  		<?php
 		  			require_once 'util.php';
 		  			$util2 = new Util;
@@ -28,8 +27,7 @@
   						OCILogoff($db_conn);
   					}
 				?>
-			</select>
-	<br>
+		</select>
         <input type="submit" value="View Rooms" name="viewRooms" class="btn btn-default"></p>
 	</div>
 
