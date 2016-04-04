@@ -1,12 +1,15 @@
 <html>
-	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/custom.css">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
 	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 <body>
 <nav class="navbar navbar-default">
-<div class="navbar-header">
-      <h2 class="navbar-brand">Manager</h2>
-</div>
+    <div class="navbar-header">
+      <a class="navbar-brand" href="manager.php">Management Console</a>
+      <a class="navbar-brand" href="employee.php">Go to Employee Console</a>
+      <a class="navbar-brand" href="login.php?action=logout">Log out</a>
+    </div>
 </nav>
 <div class="container">
 	<form method="POST" action="manager.php" role="form" class="form-inline">
@@ -254,9 +257,6 @@
 										echo "average is : " . $row[0] . " for location: " . $row[1] ;
 										OCICommit($db_conn);
 								}
-			
-			echo '<br> <a href="employee.php"> Go to Employee Page</a></br>';
-            echo '<a href="login.php?action=logout">Log out</a>';
         		OCILogoff($db_conn);
 		} else {
         		$err = OCIError();
