@@ -124,7 +124,6 @@ class MyAccount {
      private function doEditReservation() {
      	if (!isset($_POST['edit'])) {
      		echo "There's nothing here! <br>";
-     		echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '" class="btn btn-default">Back to Account Summary</a>';
      		return;
      	}
 
@@ -171,8 +170,6 @@ class MyAccount {
 
      	echo "<input type='submit' value='Update' name='edit' class='btn btn-default'>";
         echo "<input type='submit' value='Delete' name='delete' class='btn btn-default'></form>";
-
-     	echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '" class="btn btn-default">Back to Account Summary</a>';
      }
 
      /**
