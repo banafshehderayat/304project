@@ -138,7 +138,10 @@ class Login
     {
         if ($this->checkLoginFormDataNotEmpty()) {
             if ($this->createDatabaseConnection()) {
-                $this->checkPasswordCorrectnessAndLogin();
+                if (!($this->checkPasswordCorrectnessAndLogin())) {
+                    $message = "No user with these credentials found. Please try again.";
+                    echo "<script type='text/javascript'>alert('" . $message . "');</script>";
+                }
             }
         }
     }
