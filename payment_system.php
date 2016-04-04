@@ -17,8 +17,8 @@
 
 	<div class="container">
 		<form method="POST" action="payment_system.php">
-			<div class="form-group">
-			    <label> Location Address <label>
+			<div class="form-inline">
+			    <label> Location Address: <label>
 				<?php
 		  			require_once 'util.php';
 		  			$util2 = new Util;
@@ -29,34 +29,31 @@
 						echo "<select class='form-control'  name=\"loc_room\" required>";
 						$util2->printResultDropdown($result, 'CONCATENATION');
 						OCILogoff($db_conn);
-						echo "</select><br>";
+						echo "</select>";
 					}
 				?>
 			</div>
 			<div class="form-group">
-    			<label> Start Date<label>
+    			<label> Start Date: <label>
     			<input type="date" class="form-control" name="startDate" required>
 			</div>
-			<br>
       		<div class="form-group">
-    			<label> End Date<label>
+    			<label> End Date: <label>
     			 <input type="date" class="form-control" name="endDate" required>
 			</div>
-			<br>
             
       		<input type="submit" class="form-control" value="Check Price" name="checkCost">
       		<input type="submit" class="form-control" value="Show cheapest room!" name="lowco"></p>
 			<div class="form-group">
-			<label> Payment type<label>
-				
+			<label> Payment type: <label>
 				<select class="form-control" id="paymentType" name="paymentType" required>
 					<option value="Cash">Cash</option>
 					<option value="Mastercard">Mastercard</option>
 					<option value="Visa">Visa</option>
-				</select> </div><br>
+				</select> </div>
 			<div class="form-group">
-			<label> Card Number<label>
-			 <input type="text" class="form-control" id="cardNo" name="cardNo" required> </div><br>
+			<label> Card Number: <label>
+			 <input type="text" class="form-control" id="cardNo" name="cardNo" required> </div>
 			<input type="submit" class="form-control" value="Save Reservation" name="saveRes">
 		</form>
 

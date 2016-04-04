@@ -22,28 +22,25 @@
 </nav>
 <div class="container">
 <form method="POST" action="employee.php">
-	<div class="form-inline">
-	<select name="loc" class="form-control" style="width:200px">
-		  		<?php
-		  			require_once 'util.php';
-		  			$util2 = new Util;
-  					$debug = False;
-  					if ($debug) {
-  					}
-  		  		$db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
-  					if ($db_conn) {
-  						$result = $util2->executePlainSQL("select * from location");
-  						$util2->printResultDropdown($result, 'LOCATION_ADDRESS');
-  						OCILogoff($db_conn);
-  					}
-				?>
-		</select>
-        <input type="submit" value="View Rooms" name="viewRooms" class="btn btn-default .pull-right"></p>
-	</div>
-
-	
-
-</div>
+    	<div class="form-inline">
+    	<select name="loc" class="form-control" style="width:200px">
+    		  		<?php
+    		  			require_once 'util.php';
+    		  			$util2 = new Util;
+      					$debug = False;
+      					if ($debug) {
+      					}
+      		  		$db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
+      					if ($db_conn) {
+      						$result = $util2->executePlainSQL("select * from location");
+      						$util2->printResultDropdown($result, 'LOCATION_ADDRESS');
+      						OCILogoff($db_conn);
+      					}
+    				?>
+    		</select>
+            <input type="submit" value="View Rooms" name="viewRooms" class="btn btn-default .pull-right"></p>
+    	</div>
+    </div>
 </form>
 
 <div class="container">
