@@ -1,12 +1,14 @@
 <html>
-	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/custom.css">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
 	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 <body>
 <nav class="navbar navbar-default">
-<div class="navbar-header">
-      <h2 class="navbar-brand">Login / Registration</h2>
-</div>
+    <div class="navbar-header">
+      <a class="navbar-brand" href="login.php">Login / Registration</a>
+      <a class="navbar-brand" href="login.php?action=register">Register new account</a>
+    </div>
 </nav>
 
 <?php
@@ -407,7 +409,7 @@ class Login
 
         $this->redirectAfterLogin();
 
-        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=logout">Log out</a>';
+        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=logout" class="btn btn-default">Log out</a>';
     }
 
     /**
@@ -457,7 +459,6 @@ class Login
         echo '<input type="submit"  name="login" class="form-control" value="Log in" />';
         echo '</form>';
 	echo '</div>';
-        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=register">Register new account</a>';
     }
 
     /**
@@ -497,7 +498,7 @@ class Login
         echo '<input type="submit" name="register" class="form-control" value="Register" />';
         echo '</form>';
 
-        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '">Log In</a>';
+        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '" class="btn btn-default"> Go back to Log In</a>';
     }
 }
 

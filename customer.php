@@ -1,13 +1,17 @@
 <html>
-	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/custom.css">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
 	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 <body>
 <nav class="navbar navbar-default">
-<div class="navbar-header">
-      <h2 class="navbar-brand">Customer</h2>
-</div>
+    <div class="navbar-header">
+      <a class="navbar-brand" href="customer.php">My Reservations</a>
+      <a class="navbar-brand" href="payment_system.php">Make Reservation!</a>
+      <a class="navbar-brand" href="login.php?action=logout">Log out</a>
+    </div>
 </nav>
+
 <?php
 error_reporting(-1);
 ini_set('display_errors',1);
@@ -120,7 +124,7 @@ class MyAccount {
      private function doEditReservation() {
      	if (!isset($_POST['edit'])) {
      		echo "There's nothing here! <br>";
-     		echo '<br><br><a href="' . $_SERVER['SCRIPT_NAME'] . '">Back to Account Summary</a>';
+     		echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '" class="btn btn-default">Back to Account Summary</a>';
      		return;
      	}
 
@@ -168,7 +172,7 @@ class MyAccount {
      	echo "<input type='submit' value='Update' name='edit' class='btn btn-default'>";
         echo "<input type='submit' value='Delete' name='delete' class='btn btn-default'></form>";
 
-     	echo '<br><br><a href="' . $_SERVER['SCRIPT_NAME'] . '">Back to Account Summary</a>';
+     	echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '" class="btn btn-default">Back to Account Summary</a>';
      }
 
      /**
@@ -277,9 +281,6 @@ class MyAccount {
 
 	 	// Display resrevations
 	 	$this->printReservations($reservations);
-        
-        echo '<a href="payment_system.php">Make Reservation!</a><br>';
-	 	echo '<a href="login.php?action=logout">Log out</a>';
 	 }
 
 

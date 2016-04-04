@@ -1,12 +1,14 @@
 <html>
-	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
-	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/custom.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 <body>
 <nav class="navbar navbar-default">
-<div class="navbar-header">
-      <h2 class="navbar-brand">Employee</h2>
-</div>
+    <div class="navbar-header">
+      <a class="navbar-brand" href="employee.php">Employee Console</a>
+      <a class="navbar-brand" href="login.php?action=logout">Log out</a>
+    </div>
 </nav>
 <div class="container">
 <form method="POST" action="employee.php">
@@ -68,13 +70,13 @@ if ($db_conn) {
                           	$util->printResultTable($stid , ["ROOM_NUMBER", "LOCATION_ADDRESS", "TYPE", "MAX_OCCUPANCY", "COST_PER_DAY"]);
                           	OCICommit($db_conn);
         } 
-	   echo '<a href="updateRooms.php"> Update Rooms</a>';
+	   echo '<a href="updateRooms.php" class="btn btn-default"> Update Rooms</a>';
 
 
 	   if ($_SESSION['user_type'] == 'MANAGER'){
 	       echo '<br>';
-	       echo '<a href="manager.php">Go to Manager Page</a></br>';
-           echo '<a href="login.php?action=logout">Log out</a>';	
+	       echo '<a href="manager.php" class="btn btn-default">Go to Manager Page</a></br>';
+           echo '<a href="login.php?action=logout" class="btn btn-default">Log out</a>';	
 	   }
 
 
