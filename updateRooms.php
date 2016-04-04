@@ -1,13 +1,17 @@
 <html>
-	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/custom.css">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
 	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 <body>
+
 <nav class="navbar navbar-default">
-<div class="navbar-header">
-      <h2 class="navbar-brand">Update Rooms</h2>
-</div>
+    <div class="navbar-header">
+      <a class="navbar-brand" href="updateRooms.php">Update Rooms</a>
+      <a class="navbar-brand" href="employee.php">Go back Employee Console</a>
+    </div>
 </nav>
+
 	<?php
 		error_reporting(E_ERROR);
 		ini_set('display_errors',1);
@@ -79,7 +83,6 @@
 			echo "</form>";
 			OCICommit($db_conn);
 
-			echo '<a href="employee.php"> Back to the Employee Page </a>';
 			OCILogoff($db_conn);
 		} else {
 			$err = OCIError();

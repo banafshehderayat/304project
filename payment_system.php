@@ -1,18 +1,20 @@
 
 <html>
 	<head>
-		<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
-	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-		
+        <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="css/custom.css">
+    	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 	</head>
 	<body>
+    <nav class="navbar navbar-default">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="payment_system.php">Reservation Nation</a>
+          <a class="navbar-brand" href="customer.php">Go to My Account!</a>
+          <a class="navbar-brand" href="login.php?action=logout">Log out</a>
+        </div>
+    </nav>
 
-	<nav class="navbar navbar-default">
-<div class="navbar-header">
-      <h2 class="navbar-brand">Payment System</h2>
-</div>
-</nav>
 	<div class="container">
 		<form method="POST" action="payment_system.php">
 			<div class="form-group">
@@ -84,8 +86,6 @@
 	 	    notLoggedIn();
 	 		return false;
 	 	}
-        echo '<a href="customer.php">Go to My Account!</a><br>';
-        echo '<a href="login.php?action=logout">Log out</a>';
         
 		error_reporting(-1);
 		ini_set('display_errors',1);
