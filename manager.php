@@ -51,7 +51,7 @@
 	  		<?php 
                 require_once 'util.php';
                 $util2 = new Util;
-				$debug = True;
+				$debug = False;
                 
                 $db_conn = OCILogon("ora_j7l8", "a31501125", "ug");
 				if ($db_conn) {
